@@ -1,0 +1,1191 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "Onkyo",
+  "description": {
+    "en": "Control Onkyo, Integra and Pioneer network AV receivers: power, volume, inputs, zones.",
+    "fr": "Pilotez vos amplis Onkyo, Integra et Pioneer en réseau : marche, volume, entrées, zones."
+  },
+  "version": "1.0.0",
+  "docker_image": "ghcr.io/prohand/gladys-onkyo:1.0.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/prohand/gladys-onkyo/main/cover.png",
+  "categories": ["multimedia"],
+  "transports": ["local"],
+  "network_discovery": [
+    {
+      "type": "udp-active-broadcast",
+      "ports": [60128]
+    }
+  ],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer"
+      },
+      "description": {
+        "en": "The receivers are found on your network: open the Discovery tab and add them. Everything stays local (eISCP protocol, port 60128), no account, no cloud. On the receiver, turn on Network Standby (Setup > Hardware > Power Management), or Gladys loses it as soon as it goes to standby.",
+        "fr": "Les amplis sont trouvés sur votre réseau : ouvrez l'onglet Découverte et ajoutez-les. Tout reste en local (protocole eISCP, port 60128), sans compte ni cloud. Sur l'ampli, activez la Veille réseau (Setup > Hardware > Power Management), sinon Gladys le perd dès sa mise en veille."
+      },
+      "links": [
+        {
+          "url": "https://github.com/prohand/gladys-onkyo/blob/main/docs/en.md",
+          "label": {
+            "en": "Integration documentation",
+            "fr": "Documentation de l'intégration"
+          }
+        }
+      ]
+    },
+    {
+      "key": "hosts",
+      "type": "string",
+      "label": {
+        "en": "Receiver addresses",
+        "fr": "Adresses des amplis"
+      },
+      "description": {
+        "en": "Only for a receiver the Discovery tab does not find (another subnet, a VLAN): its IP address, several separated by commas. A fixed IP in your router is recommended.",
+        "fr": "Uniquement pour un ampli que l'onglet Découverte ne trouve pas (autre sous-réseau, VLAN) : son adresse IP, plusieurs séparées par des virgules. Une IP fixe dans votre box est conseillée."
+      },
+      "placeholder": {
+        "en": "192.168.1.40, 192.168.1.41",
+        "fr": "192.168.1.40, 192.168.1.41"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "zones",
+      "type": "select",
+      "label": {
+        "en": "Zones",
+        "fr": "Zones"
+      },
+      "description": {
+        "en": "One Gladys device per zone. Automatic: the zones the receiver declares (the main zone alone on older models).",
+        "fr": "Un appareil Gladys par zone. Automatique : les zones que l'ampli déclare (la zone principale seule sur les anciens modèles)."
+      },
+      "required": false,
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Automatic",
+            "fr": "Automatique"
+          }
+        },
+        {
+          "value": "1",
+          "label": {
+            "en": "Main zone only",
+            "fr": "Zone principale seule"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "Main zone + zone 2",
+            "fr": "Zone principale + zone 2"
+          }
+        },
+        {
+          "value": "3",
+          "label": {
+            "en": "Main zone + zones 2 and 3",
+            "fr": "Zone principale + zones 2 et 3"
+          }
+        }
+      ]
+    },
+    {
+      "key": "volume_resolution",
+      "type": "select",
+      "label": {
+        "en": "Volume scale of the receiver",
+        "fr": "Échelle de volume de l'ampli"
+      },
+      "description": {
+        "en": "The highest volume value the receiver shows. 80 on most models, 200 on recent ones that step by 0.5. \"Test the connection\" tells what the receiver declares.",
+        "fr": "La valeur de volume la plus haute affichée par l'ampli. 80 sur la plupart des modèles, 200 sur les récents qui avancent par 0,5. « Tester la connexion » indique ce que l'ampli déclare."
+      },
+      "required": false,
+      "default": "80",
+      "options": [
+        {
+          "value": "50",
+          "label": {
+            "en": "50 steps",
+            "fr": "50 pas"
+          }
+        },
+        {
+          "value": "80",
+          "label": {
+            "en": "80 steps",
+            "fr": "80 pas"
+          }
+        },
+        {
+          "value": "100",
+          "label": {
+            "en": "100 steps",
+            "fr": "100 pas"
+          }
+        },
+        {
+          "value": "200",
+          "label": {
+            "en": "200 steps (0.5 step)",
+            "fr": "200 pas (pas de 0,5)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "max_volume",
+      "type": "number",
+      "label": {
+        "en": "Maximum volume (%)",
+        "fr": "Volume maximal (%)"
+      },
+      "description": {
+        "en": "Gladys never sends a volume above this, whatever a scene or a slider asks: protects your speakers and your ears.",
+        "fr": "Gladys n'envoie jamais un volume au-dessus, quoi que demande une scène ou un curseur : protège vos enceintes et vos oreilles."
+      },
+      "required": false,
+      "default": 80,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "debug_logs",
+      "type": "boolean",
+      "label": {
+        "en": "Detailed logs (debug)",
+        "fr": "Journaux détaillés (debug)"
+      },
+      "description": {
+        "en": "Log every message exchanged with the receivers. Turn it on to understand a problem, then off again: it is verbose.",
+        "fr": "Journalise chaque message échangé avec les amplis. Activez-le pour comprendre un problème, puis désactivez-le : c'est verbeux."
+      },
+      "required": false,
+      "default": false
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "send_command",
+      "label": {
+        "en": "Send an ISCP command",
+        "fr": "Envoyer une commande ISCP"
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Receiver",
+            "fr": "Ampli"
+          },
+          "required": true
+        },
+        {
+          "key": "command",
+          "type": "string",
+          "label": {
+            "en": "Command",
+            "fr": "Commande"
+          },
+          "description": {
+            "en": "Three letters and a parameter, e.g. PWR01 (on), MVL20 (volume), SLI23 (CD), LMDQSTN (listening mode?).",
+            "fr": "Trois lettres et un paramètre, par exemple PWR01 (allumer), MVL20 (volume), SLI23 (CD), LMDQSTN (mode d'écoute ?)."
+          },
+          "placeholder": {
+            "en": "PWRQSTN",
+            "fr": "PWRQSTN"
+          },
+          "required": true
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "receiver",
+      "label": {
+        "en": "Onkyo receiver",
+        "fr": "Ampli Onkyo"
+      },
+      "description": {
+        "en": "Now playing, volume, input and power of a zone, with power, volume and mute buttons.",
+        "fr": "Lecture en cours, volume, entrée et état d'une zone, avec boutons marche, volume et muet."
+      },
+      "icon": "speaker",
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Zone",
+            "fr": "Zone"
+          },
+          "required": false
+        }
+      ],
+      "action_timeout_seconds": 15
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "source_changed",
+      "label": {
+        "en": "The input of a receiver changed",
+        "fr": "L'entrée d'un ampli a changé"
+      },
+      "description": {
+        "en": "Someone picked another input (remote, front panel, app). Gladys own orders never fire it.",
+        "fr": "Quelqu'un a choisi une autre entrée (télécommande, façade, appli). Les ordres de Gladys ne le déclenchent jamais."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Zone",
+            "fr": "Zone"
+          },
+          "required": false
+        },
+        {
+          "key": "source",
+          "type": "multi_select",
+          "label": {
+            "en": "New input",
+            "fr": "Nouvelle entrée"
+          },
+          "options": [
+            {
+              "value": "10",
+              "label": {
+                "en": "BD/DVD",
+                "fr": "BD/DVD"
+              }
+            },
+            {
+              "value": "01",
+              "label": {
+                "en": "CBL/SAT",
+                "fr": "CBL/SAT"
+              }
+            },
+            {
+              "value": "00",
+              "label": {
+                "en": "STB/DVR",
+                "fr": "STB/DVR"
+              }
+            },
+            {
+              "value": "02",
+              "label": {
+                "en": "GAME",
+                "fr": "GAME"
+              }
+            },
+            {
+              "value": "11",
+              "label": {
+                "en": "STRM BOX",
+                "fr": "STRM BOX"
+              }
+            },
+            {
+              "value": "05",
+              "label": {
+                "en": "PC",
+                "fr": "PC"
+              }
+            },
+            {
+              "value": "03",
+              "label": {
+                "en": "AUX",
+                "fr": "AUX"
+              }
+            },
+            {
+              "value": "04",
+              "label": {
+                "en": "AUX2",
+                "fr": "AUX2"
+              }
+            },
+            {
+              "value": "12",
+              "label": {
+                "en": "TV",
+                "fr": "TV"
+              }
+            },
+            {
+              "value": "23",
+              "label": {
+                "en": "CD",
+                "fr": "CD"
+              }
+            },
+            {
+              "value": "22",
+              "label": {
+                "en": "PHONO",
+                "fr": "PHONO"
+              }
+            },
+            {
+              "value": "20",
+              "label": {
+                "en": "TAPE",
+                "fr": "TAPE"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "FM",
+                "fr": "FM"
+              }
+            },
+            {
+              "value": "25",
+              "label": {
+                "en": "AM",
+                "fr": "AM"
+              }
+            },
+            {
+              "value": "26",
+              "label": {
+                "en": "TUNER",
+                "fr": "TUNER"
+              }
+            },
+            {
+              "value": "33",
+              "label": {
+                "en": "DAB",
+                "fr": "DAB"
+              }
+            },
+            {
+              "value": "2B",
+              "label": {
+                "en": "NET",
+                "fr": "NET"
+              }
+            },
+            {
+              "value": "27",
+              "label": {
+                "en": "MUSIC SERVER",
+                "fr": "MUSIC SERVER"
+              }
+            },
+            {
+              "value": "28",
+              "label": {
+                "en": "INTERNET RADIO",
+                "fr": "INTERNET RADIO"
+              }
+            },
+            {
+              "value": "29",
+              "label": {
+                "en": "USB (front)",
+                "fr": "USB (front)"
+              }
+            },
+            {
+              "value": "2A",
+              "label": {
+                "en": "USB (rear)",
+                "fr": "USB (rear)"
+              }
+            },
+            {
+              "value": "2E",
+              "label": {
+                "en": "BLUETOOTH",
+                "fr": "BLUETOOTH"
+              }
+            },
+            {
+              "value": "2D",
+              "label": {
+                "en": "AIRPLAY",
+                "fr": "AIRPLAY"
+              }
+            },
+            {
+              "value": "41",
+              "label": {
+                "en": "LINE",
+                "fr": "LINE"
+              }
+            },
+            {
+              "value": "44",
+              "label": {
+                "en": "OPTICAL",
+                "fr": "OPTICAL"
+              }
+            },
+            {
+              "value": "45",
+              "label": {
+                "en": "COAXIAL",
+                "fr": "COAXIAL"
+              }
+            },
+            {
+              "value": "30",
+              "label": {
+                "en": "MULTI CH",
+                "fr": "MULTI CH"
+              }
+            },
+            {
+              "value": "80",
+              "label": {
+                "en": "Main zone source",
+                "fr": "Source de la zone principale"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "source",
+          "type": "string",
+          "label": {
+            "en": "Input code",
+            "fr": "Code de l'entrée"
+          }
+        },
+        {
+          "key": "source_name",
+          "type": "string",
+          "label": {
+            "en": "Input name",
+            "fr": "Nom de l'entrée"
+          }
+        }
+      ]
+    },
+    {
+      "key": "track_changed",
+      "label": {
+        "en": "A new track is playing",
+        "fr": "Un nouveau morceau est joué"
+      },
+      "description": {
+        "en": "The network or USB player of the receiver moved to another track (title, artist, album).",
+        "fr": "Le lecteur réseau ou USB de l'ampli est passé à un autre morceau (titre, artiste, album)."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Receiver",
+            "fr": "Ampli"
+          },
+          "required": false
+        }
+      ],
+      "variables": [
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title",
+            "fr": "Titre"
+          }
+        },
+        {
+          "key": "artist",
+          "type": "string",
+          "label": {
+            "en": "Artist",
+            "fr": "Artiste"
+          }
+        },
+        {
+          "key": "album",
+          "type": "string",
+          "label": {
+            "en": "Album",
+            "fr": "Album"
+          }
+        }
+      ]
+    },
+    {
+      "key": "connection_changed",
+      "label": {
+        "en": "A receiver went online or offline",
+        "fr": "Un ampli est connecté ou déconnecté"
+      },
+      "description": {
+        "en": "The link to the receiver dropped (unplugged, network standby off) or came back. A restart of Gladys never fires it.",
+        "fr": "La liaison avec l'ampli est tombée (débranché, veille réseau désactivée) ou revenue. Un redémarrage de Gladys ne le déclenche jamais."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Zone",
+            "fr": "Zone"
+          },
+          "required": false
+        },
+        {
+          "key": "state",
+          "type": "multi_select",
+          "label": {
+            "en": "State",
+            "fr": "État"
+          },
+          "options": [
+            {
+              "value": "online",
+              "label": {
+                "en": "Online",
+                "fr": "Connecté"
+              }
+            },
+            {
+              "value": "offline",
+              "label": {
+                "en": "Offline",
+                "fr": "Déconnecté"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "state",
+          "type": "string",
+          "label": {
+            "en": "State",
+            "fr": "État"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "play_source",
+      "label": {
+        "en": "Play an input on a receiver",
+        "fr": "Jouer une entrée sur un ampli"
+      },
+      "description": {
+        "en": "Switch the zone on if needed, wait for it, pick the input, then set the volume.",
+        "fr": "Allume la zone si besoin, l'attend, choisit l'entrée, puis règle le volume."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Zone",
+            "fr": "Zone"
+          },
+          "required": true
+        },
+        {
+          "key": "source",
+          "type": "select",
+          "label": {
+            "en": "Input",
+            "fr": "Entrée"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "10",
+              "label": {
+                "en": "BD/DVD",
+                "fr": "BD/DVD"
+              }
+            },
+            {
+              "value": "01",
+              "label": {
+                "en": "CBL/SAT",
+                "fr": "CBL/SAT"
+              }
+            },
+            {
+              "value": "00",
+              "label": {
+                "en": "STB/DVR",
+                "fr": "STB/DVR"
+              }
+            },
+            {
+              "value": "02",
+              "label": {
+                "en": "GAME",
+                "fr": "GAME"
+              }
+            },
+            {
+              "value": "11",
+              "label": {
+                "en": "STRM BOX",
+                "fr": "STRM BOX"
+              }
+            },
+            {
+              "value": "05",
+              "label": {
+                "en": "PC",
+                "fr": "PC"
+              }
+            },
+            {
+              "value": "03",
+              "label": {
+                "en": "AUX",
+                "fr": "AUX"
+              }
+            },
+            {
+              "value": "04",
+              "label": {
+                "en": "AUX2",
+                "fr": "AUX2"
+              }
+            },
+            {
+              "value": "12",
+              "label": {
+                "en": "TV",
+                "fr": "TV"
+              }
+            },
+            {
+              "value": "23",
+              "label": {
+                "en": "CD",
+                "fr": "CD"
+              }
+            },
+            {
+              "value": "22",
+              "label": {
+                "en": "PHONO",
+                "fr": "PHONO"
+              }
+            },
+            {
+              "value": "20",
+              "label": {
+                "en": "TAPE",
+                "fr": "TAPE"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "FM",
+                "fr": "FM"
+              }
+            },
+            {
+              "value": "25",
+              "label": {
+                "en": "AM",
+                "fr": "AM"
+              }
+            },
+            {
+              "value": "26",
+              "label": {
+                "en": "TUNER",
+                "fr": "TUNER"
+              }
+            },
+            {
+              "value": "33",
+              "label": {
+                "en": "DAB",
+                "fr": "DAB"
+              }
+            },
+            {
+              "value": "2B",
+              "label": {
+                "en": "NET",
+                "fr": "NET"
+              }
+            },
+            {
+              "value": "27",
+              "label": {
+                "en": "MUSIC SERVER",
+                "fr": "MUSIC SERVER"
+              }
+            },
+            {
+              "value": "28",
+              "label": {
+                "en": "INTERNET RADIO",
+                "fr": "INTERNET RADIO"
+              }
+            },
+            {
+              "value": "29",
+              "label": {
+                "en": "USB (front)",
+                "fr": "USB (front)"
+              }
+            },
+            {
+              "value": "2A",
+              "label": {
+                "en": "USB (rear)",
+                "fr": "USB (rear)"
+              }
+            },
+            {
+              "value": "2E",
+              "label": {
+                "en": "BLUETOOTH",
+                "fr": "BLUETOOTH"
+              }
+            },
+            {
+              "value": "2D",
+              "label": {
+                "en": "AIRPLAY",
+                "fr": "AIRPLAY"
+              }
+            },
+            {
+              "value": "41",
+              "label": {
+                "en": "LINE",
+                "fr": "LINE"
+              }
+            },
+            {
+              "value": "44",
+              "label": {
+                "en": "OPTICAL",
+                "fr": "OPTICAL"
+              }
+            },
+            {
+              "value": "45",
+              "label": {
+                "en": "COAXIAL",
+                "fr": "COAXIAL"
+              }
+            },
+            {
+              "value": "30",
+              "label": {
+                "en": "MULTI CH",
+                "fr": "MULTI CH"
+              }
+            },
+            {
+              "value": "80",
+              "label": {
+                "en": "Main zone source",
+                "fr": "Source de la zone principale"
+              }
+            }
+          ]
+        },
+        {
+          "key": "volume",
+          "type": "number",
+          "label": {
+            "en": "Volume (%), optional",
+            "fr": "Volume (%), facultatif"
+          },
+          "required": false,
+          "min": 0,
+          "max": 100
+        }
+      ],
+      "outputs": [
+        {
+          "key": "source",
+          "type": "string",
+          "label": {
+            "en": "Input code",
+            "fr": "Code de l'entrée"
+          }
+        },
+        {
+          "key": "volume",
+          "type": "number",
+          "label": {
+            "en": "Volume set (%)",
+            "fr": "Volume réglé (%)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_mute",
+      "label": {
+        "en": "Mute a receiver",
+        "fr": "Couper le son d’un ampli"
+      },
+      "description": {
+        "en": "Mute, unmute or toggle one zone.",
+        "fr": "Coupe, remet ou inverse le son d’une zone."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Zone",
+            "fr": "Zone"
+          },
+          "required": true
+        },
+        {
+          "key": "mode",
+          "type": "select",
+          "label": {
+            "en": "Sound",
+            "fr": "Son"
+          },
+          "required": true,
+          "default": "on",
+          "options": [
+            {
+              "value": "on",
+              "label": {
+                "en": "Mute",
+                "fr": "Couper le son"
+              }
+            },
+            {
+              "value": "off",
+              "label": {
+                "en": "Unmute",
+                "fr": "Remettre le son"
+              }
+            },
+            {
+              "value": "toggle",
+              "label": {
+                "en": "Toggle",
+                "fr": "Inverser"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "muted",
+          "type": "boolean",
+          "label": {
+            "en": "Muted",
+            "fr": "Son coupé"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_listening_mode",
+      "label": {
+        "en": "Set the listening mode",
+        "fr": "Changer le mode d'écoute"
+      },
+      "description": {
+        "en": "Stereo, Direct, Dolby, DTS… of the main zone.",
+        "fr": "Stéréo, Direct, Dolby, DTS… de la zone principale."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Receiver (main zone)",
+            "fr": "Ampli (zone principale)"
+          },
+          "required": true
+        },
+        {
+          "key": "mode",
+          "type": "select",
+          "label": {
+            "en": "Listening mode",
+            "fr": "Mode d'écoute"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "00",
+              "label": {
+                "en": "Stereo",
+                "fr": "Stereo"
+              }
+            },
+            {
+              "value": "01",
+              "label": {
+                "en": "Direct",
+                "fr": "Direct"
+              }
+            },
+            {
+              "value": "11",
+              "label": {
+                "en": "Pure Audio",
+                "fr": "Pure Audio"
+              }
+            },
+            {
+              "value": "0F",
+              "label": {
+                "en": "Mono",
+                "fr": "Mono"
+              }
+            },
+            {
+              "value": "0C",
+              "label": {
+                "en": "All Ch Stereo",
+                "fr": "All Ch Stereo"
+              }
+            },
+            {
+              "value": "02",
+              "label": {
+                "en": "Surround",
+                "fr": "Surround"
+              }
+            },
+            {
+              "value": "40",
+              "label": {
+                "en": "Straight Decode",
+                "fr": "Straight Decode"
+              }
+            },
+            {
+              "value": "80",
+              "label": {
+                "en": "Dolby Surround / PLII Movie",
+                "fr": "Dolby Surround / PLII Movie"
+              }
+            },
+            {
+              "value": "81",
+              "label": {
+                "en": "PLII Music",
+                "fr": "PLII Music"
+              }
+            },
+            {
+              "value": "86",
+              "label": {
+                "en": "PLII Game",
+                "fr": "PLII Game"
+              }
+            },
+            {
+              "value": "82",
+              "label": {
+                "en": "DTS Neural:X / Neo:6 Cinema",
+                "fr": "DTS Neural:X / Neo:6 Cinema"
+              }
+            },
+            {
+              "value": "83",
+              "label": {
+                "en": "Neo:6 Music",
+                "fr": "Neo:6 Music"
+              }
+            },
+            {
+              "value": "03",
+              "label": {
+                "en": "Film",
+                "fr": "Film"
+              }
+            },
+            {
+              "value": "05",
+              "label": {
+                "en": "Action",
+                "fr": "Action"
+              }
+            },
+            {
+              "value": "06",
+              "label": {
+                "en": "Musical",
+                "fr": "Musical"
+              }
+            },
+            {
+              "value": "08",
+              "label": {
+                "en": "Orchestra",
+                "fr": "Orchestra"
+              }
+            },
+            {
+              "value": "09",
+              "label": {
+                "en": "Unplugged",
+                "fr": "Unplugged"
+              }
+            },
+            {
+              "value": "0A",
+              "label": {
+                "en": "Studio-Mix",
+                "fr": "Studio-Mix"
+              }
+            },
+            {
+              "value": "0B",
+              "label": {
+                "en": "TV Logic",
+                "fr": "TV Logic"
+              }
+            },
+            {
+              "value": "0D",
+              "label": {
+                "en": "Theater-Dimensional",
+                "fr": "Theater-Dimensional"
+              }
+            },
+            {
+              "value": "0E",
+              "label": {
+                "en": "Enhance",
+                "fr": "Enhance"
+              }
+            },
+            {
+              "value": "14",
+              "label": {
+                "en": "Dolby Virtual",
+                "fr": "Dolby Virtual"
+              }
+            },
+            {
+              "value": "FF",
+              "label": {
+                "en": "Auto Surround",
+                "fr": "Auto Surround"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "mode",
+          "type": "string",
+          "label": {
+            "en": "Listening mode",
+            "fr": "Mode d'écoute"
+          }
+        }
+      ]
+    },
+    {
+      "key": "send_command",
+      "label": {
+        "en": "Send an ISCP command",
+        "fr": "Envoyer une commande ISCP"
+      },
+      "description": {
+        "en": "Any command of the Onkyo protocol, for what the other actions do not cover.",
+        "fr": "Toute commande du protocole Onkyo, pour ce que les autres actions ne couvrent pas."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Receiver",
+            "fr": "Ampli"
+          },
+          "required": true
+        },
+        {
+          "key": "command",
+          "type": "string",
+          "label": {
+            "en": "Command",
+            "fr": "Commande"
+          },
+          "placeholder": {
+            "en": "MVL28",
+            "fr": "MVL28"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "answer",
+          "type": "string",
+          "label": {
+            "en": "Answer of the receiver",
+            "fr": "Réponse de l'ampli"
+          }
+        }
+      ]
+    }
+  ]
+}
