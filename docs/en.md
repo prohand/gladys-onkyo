@@ -96,7 +96,14 @@ first receiver's main zone):
 
 - volume and input;
 - status: power, track playing, sound, listening mode, link;
-- buttons: on/standby, volume down, volume up, mute.
+- buttons: on/standby, volume down, volume up, mute when the zone is on; on
+  and **Play a source** when it is in standby.
+
+**Play a source** opens a small form: pick an input of the zone (the current
+one is pre-filled) and, if you like, a volume in %, capped by the **Maximum
+volume** setting. Gladys switches the zone on, waits for it, then selects the
+input and sets the volume, exactly like the scene action. This form needs
+Gladys 5.2 or later, which the integration now requires.
 
 ## Configuration buttons
 

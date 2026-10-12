@@ -100,7 +100,15 @@ zone principale du premier ampli) :
 
 - volume et entrée ;
 - état : alimentation, morceau en cours, son, mode d'écoute, liaison ;
-- boutons : marche/veille, volume −, volume +, muet.
+- boutons : marche/veille, volume −, volume +, muet quand la zone est allumée ;
+  marche et **Lire une source** quand elle est en veille.
+
+**Lire une source** ouvre un petit formulaire : choisissez une entrée de la
+zone (celle en cours est pré-remplie) et, si vous voulez, un volume en %,
+plafonné par le réglage **Volume maximal**. Gladys allume la zone, l'attend,
+puis choisit l'entrée et règle le volume, exactement comme l'action de scène. Ce
+formulaire demande Gladys 5.2 ou plus récent, désormais requis par
+l'intégration.
 
 ## Boutons de la configuration
 

@@ -31,6 +31,36 @@ test('sync connects the created receivers and publishes their states', async () 
   hub.stop();
 });
 
+test('an unchanged value is not sent twice; a reconnection to Gladys re-sends everything', async () => {
+  const ctx = setupHub();
+  await ready(ctx);
+  const { gladys, hub } = ctx;
+  hub.list[0].handleMessage({ command: 'MVL', value: '28' });
+  await settle(10);
+  assert.deepEqual(gladys.statesOf(`${MAIN}:volume`), [50]);
+  // sync() runs at every connection to Gladys and every device creation.
+  await hub.sync();
+  await settle(10);
+  assert.deepEqual(gladys.statesOf(`${MAIN}:volume`), [50, 50]);
+  assert.deepEqual(gladys.statesOf(`${MAIN}:source`), [{ text: '2B' }, { text: '2B' }]);
+  hub.stop();
+});
+
+test('a state Gladys refused is sent again with the next publication', async () => {
+  const ctx = setupHub();
+  await ready(ctx);
+  const { gladys, hub } = ctx;
+  gladys.refuseStates = new Error('HTTP 429');
+  hub.list[0].handleMessage({ command: 'MVL', value: '20' });
+  await settle(10);
+  assert.deepEqual(gladys.statesOf(`${MAIN}:volume`), [50]);
+  gladys.refuseStates = null;
+  // Not remembered as published: the same value goes out on the next try.
+  await hub.publish(hub.list[0], 'main', 'volume', 40);
+  assert.deepEqual(gladys.statesOf(`${MAIN}:volume`), [50, 40]);
+  hub.stop();
+});
+
 test('no receiver yet: connected, with the way to add one', async () => {
   const { gladys, hub } = setupHub({ created: [] });
   await hub.sync();

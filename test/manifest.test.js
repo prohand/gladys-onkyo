@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { DEFAULT_CONFIG } from '../src/config.js';
 import { SCENE_ACTIONS } from '../src/capabilities/scenes.js';
-import { RECEIVER_WIDGET } from '../src/capabilities/widget.js';
+import { FORM_ACTIONS, RECEIVER_WIDGET } from '../src/capabilities/widget.js';
 import { SCENE_TRIGGERS } from '../src/hub.js';
 import {
   INPUTS,
@@ -108,12 +108,21 @@ test('dynamic selects declare a source and no static options', () => {
   }
 });
 
-test('local only, discovery on the eISCP port, Gladys 5.1 floor', () => {
+test('local only, discovery on the eISCP port, Gladys 5.2 floor', () => {
   assert.deepEqual(manifest.transports, ['local']);
   assert.deepEqual(manifest.network_discovery, [
     { type: 'udp-active-broadcast', ports: [EISCP_PORT] },
   ]);
-  assert.equal(manifest.gladys_version, '>=5.1.0');
+  // 5.1.0 brought the widgets and scene cards, 5.2.0 the widget button forms
+  // (an older core drops `fields` and relays the tap without `values`).
+  assert.ok(FORM_ACTIONS.length > 0, 'the widget declares button forms');
+  assert.equal(manifest.gladys_version, '>=5.2.0');
+});
+
+test('the widget gives a button form the time of a wake-up, like play_source', () => {
+  // "Play a source" waits for the receiver to switch on, as the scene action.
+  const playSource = manifest.scene_actions.find((action) => action.key === 'play_source');
+  assert.ok(manifest.widgets[0].action_timeout_seconds >= playSource.timeout_seconds);
 });
 
 test('the widget and every scene action are handled', () => {

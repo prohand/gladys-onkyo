@@ -56,8 +56,9 @@ src/capabilities/          Gladys 5.1 scene actions, widget, Configuration butto
   `gladys.scanNetwork('udp-active-broadcast', { port: 60128 })` (declared in the manifest
   `network_discovery`). Unicast works, which is how typed hosts are probed.
 - **State is the receiver's word**: a state is only published from a message the receiver sent,
-  never from the order given. Values already published are deduplicated (`hub.published`);
-  `publishAll()` re-sends everything after a reconnection to Gladys or a device creation.
+  never from the order given. Values already published are deduplicated by the SDK
+  (`gladys.publishChangedStates`); `publishAll()` forgets them (`forgetPublishedStates()`) and
+  re-sends everything after a reconnection to Gladys or a device creation.
 - **Volume is a percentage of the configured scale** (`volume_resolution`: 50/80/100/200 steps),
   and nothing ever sends more than `max_volume` — slider, volume-up button, widget or scene.
 - **Mute is a push button (toggle)** on the device; on/off/toggle with a reported result is the

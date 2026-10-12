@@ -60,8 +60,8 @@ for (const [key, handler] of Object.entries(SCENE_ACTIONS)) {
 
 // --- Dashboard widget (Gladys 5.1+) --------------------------------------------
 gladys.onWidgetGet(RECEIVER_WIDGET, (request) => buildWidgetContent(hub, request));
-gladys.onWidgetAction(RECEIVER_WIDGET, (actionKey, params) =>
-  handleWidgetAction(hub, { actionKey, params }),
+gladys.onWidgetAction(RECEIVER_WIDGET, (actionKey, params, { values }) =>
+  handleWidgetAction(hub, { actionKey, params, values }),
 );
 
 // --- Configuration saved -------------------------------------------------------

@@ -3,8 +3,14 @@
 //
 // One zone per widget (a `"source": "devices"` setting; the first receiver's
 // main zone when none is chosen): what it plays, its volume and input, power,
-// mute, listening mode and link, and four buttons — power, volume down, volume
-// up, mute. The content is declarative: the core renders it.
+// mute, listening mode and link, and buttons. The core renders four buttons
+// at most: a zone switched on gets power, volume down, volume up and mute; a
+// zone in standby gets power and "Play a source" — a form (Gladys 5.2+) with
+// the zone's inputs and an optional volume, run like the `play_source` scene
+// action (wake, wait, input, volume). That is the gesture of a zone in
+// standby; once on, the input is one tap away on the device itself and the
+// four one-tap controls keep their place. The content is declarative: the
+// core renders it.
 //
 // The receiver pushes its changes, so the widget is nudged when one comes in
 // (rate-limited to one nudge per 10 s by the core: the nudges are spaced here,
@@ -13,6 +19,7 @@
 
 import { createLogger, WIDGET_COLORS } from '@gladysassistant/integration-sdk';
 import { listeningModeLabel } from '../onkyo/codes.js';
+import { SCENE_ACTIONS } from './scenes.js';
 
 const logger = createLogger({ name: 'widget' });
 
@@ -23,7 +30,16 @@ export const WIDGET_ACTIONS = {
   VOLUME_DOWN: 'volume_down',
   VOLUME_UP: 'volume_up',
   MUTE: 'mute',
+  PLAY_SOURCE: 'play_source',
 };
+
+// Button actions opening a form (`fields`): Gladys 5.2 is the first core that
+// relays their `values`. test/manifest.test.js ties this list to the manifest
+// `gladys_version`.
+export const FORM_ACTIONS = [WIDGET_ACTIONS.PLAY_SOURCE];
+
+// The core cuts a form option label past 40 characters.
+const OPTION_LABEL_MAX = 40;
 
 export const NUDGE_INTERVAL_MS = 10000;
 
@@ -151,6 +167,8 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
           action: { key: WIDGET_ACTIONS.MUTE, params: { device } },
         },
       );
+    } else if (zone.inputs.length > 0) {
+      components.push(playSourceButton(zone, hub.config.max_volume));
     }
   }
 
@@ -158,11 +176,91 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
 }
 
 /**
- * A tapped button. `params` are the ones the content declared, never user input.
+ * "Play a source": the inputs of THIS zone as static options (an action field
+ * takes no `source`), pre-filled with the current one; the volume is optional
+ * (empty keeps it) and bounded by the maximum volume setting, which
+ * hub.setVolume enforces again whatever arrives.
+ */
+function playSourceButton(zone, maxVolume) {
+  const source = {
+    key: 'source',
+    type: 'select',
+    required: true,
+    label: { en: 'Input', fr: 'Entrée' },
+    options: zone.inputs.map(({ value, label }) => {
+      const text = clip(label, OPTION_LABEL_MAX);
+      return { value, label: { en: text, fr: text } };
+    }),
+  };
+  if (zone.inputs.some((input) => input.value === zone.source)) {
+    source.default = zone.source;
+  }
+  return {
+    type: 'button',
+    label: { en: 'Play a source', fr: 'Lire une source' },
+    icon: 'play',
+    style: 'secondary',
+    action: {
+      key: WIDGET_ACTIONS.PLAY_SOURCE,
+      params: { device: zone.deviceExternalId },
+      fields: [
+        source,
+        {
+          key: 'volume',
+          type: 'number',
+          min: 0,
+          max: maxVolume,
+          label: { en: 'Volume (%)', fr: 'Volume (%)' },
+          placeholder: { en: 'Unchanged', fr: 'Inchangé' },
+        },
+      ],
+    },
+  };
+}
+
+/**
+ * The "Play a source" form: the `play_source` scene action itself, so the
+ * wake-up, the wait and the volume cap are the same as in a scene.
  * @returns {Promise<object>} the toast
  */
-export async function handleWidgetAction(hub, { actionKey, params = {} }) {
+async function playSource(hub, params, values, options) {
+  // A core older than 5.2 drops the form and relays the tap without
+  // `values`: there is no input to play, and guessing one would be wrong.
+  if (typeof values?.source !== 'string' || values.source.length === 0) {
+    return {
+      en: 'Choose the input in the form of the button (Gladys 5.2 or later).',
+      fr: "Choisissez l'entrée dans le formulaire du bouton (Gladys 5.2 ou plus récent).",
+    };
+  }
+  const outputs = await SCENE_ACTIONS.play_source(
+    hub,
+    { device: params.device, source: values.source, volume: values.volume },
+    options,
+  );
+  // The label of the option picked: the receiver's echo may not be in yet.
+  const name =
+    hub.findZone(params.device)?.inputs.find((input) => input.value === outputs.source)?.label ??
+    outputs.source;
+  return outputs.volume === undefined
+    ? { en: `Playing ${name}`, fr: `Lecture : ${name}` }
+    : {
+        en: `Playing ${name} at ${outputs.volume} %`,
+        fr: `Lecture : ${name} à ${outputs.volume} %`,
+      };
+}
+
+/**
+ * A tapped button. `params` are the ones the content declared, never user
+ * input; `values` are what the user typed in a button form, validated by the
+ * core against the fields declared in the content.
+ * @param {object} [options] passed to the scene action (`settleMs`, tests)
+ * @returns {Promise<object>} the toast
+ */
+export async function handleWidgetAction(hub, { actionKey, params = {}, values }, options) {
   logger.info(`Widget action ${actionKey}`);
+  if (actionKey === WIDGET_ACTIONS.PLAY_SOURCE) {
+    return playSource(hub, params, values, options);
+  }
   const { receiver, zone } = hub.target(params.device);
   switch (actionKey) {
     case WIDGET_ACTIONS.POWER:
