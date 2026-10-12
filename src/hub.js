@@ -14,6 +14,7 @@ import { inputLabel, percentToVolume, volumeToPercent, ZONE_KEYS } from './onkyo
 import {
   buildDevices,
   FEATURES,
+  inputOptions,
   locateDevice,
   locateFeature,
   receiverName,
@@ -49,7 +50,6 @@ export class ReceiverHub {
     this.receivers = new Map();
     this.everOnline = new Set();
     this.ownOrders = new Map();
-    this.published = new Map();
     this.lastStatus = null;
     this.reportTimer = null;
     this.publishTimer = null;
@@ -86,10 +86,13 @@ export class ReceiverHub {
 
   /**
    * Publish every state already known again: Gladys may have missed them
-   * while it was away, and a device just created has none yet.
+   * while it was away, and a device just created has none yet. The SDK
+   * forgets a device's values by itself when the user creates, updates or
+   * deletes it, never on a reconnection: forgetting everything here covers
+   * both.
    */
   publishAll() {
-    this.published.clear();
+    this.gladys.forgetPublishedStates();
     for (const receiver of this.list) {
       for (const zone of ZONE_KEYS) {
         const { power, volume, source } = receiver.zones[zone];
@@ -203,6 +206,12 @@ export class ReceiverHub {
     return (this.gladys.devices ?? []).some((device) => device.external_id === deviceExternalId);
   }
 
+  /**
+   * Publish one state, `value` being a number or `{ text }`. A value equal to
+   * the last one Gladys accepted for that feature is skipped by the SDK
+   * (publishChangedStates), which also forgets a refused one so that the next
+   * change sends it again.
+   */
   async publish(receiver, zone, key, value) {
     if (!zonesFor(receiver, this.config).includes(zone)) {
       return;
@@ -212,15 +221,13 @@ export class ReceiverHub {
       return;
     }
     const featureId = ids.feature(key);
-    const signature = JSON.stringify(value);
-    if (this.published.get(featureId) === signature) {
-      return;
-    }
-    this.published.set(featureId, signature);
+    const state =
+      value !== null && typeof value === 'object'
+        ? { device_feature_external_id: featureId, text: value.text }
+        : { device_feature_external_id: featureId, state: value };
     try {
-      await this.gladys.publishState(featureId, value);
+      await this.gladys.publishChangedStates([state]);
     } catch (err) {
-      this.published.delete(featureId);
       logger.warn(`State of ${featureId} not published: ${err.message}`);
     }
   }
@@ -473,6 +480,7 @@ export class ReceiverHub {
       mute: state.mute,
       source: state.source,
       sourceName: state.source ? inputLabel(state.source, receiver.description?.inputs) : null,
+      inputs: inputOptions(receiver, zone),
       listeningMode: zone === 'main' ? receiver.main.listeningMode : null,
       nowPlaying: zone === 'main' ? receiver.nowPlaying : '',
       deviceExternalId: zoneIds(this.gladys, receiver.id, zone).device,
