@@ -8,7 +8,7 @@
   },
   "version": "1.0.1",
   "docker_image": "ghcr.io/prohand/gladys-onkyo:1.0.1",
-  "gladys_version": ">=5.1.0",
+  "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/prohand/gladys-onkyo/main/cover.png",
   "categories": ["multimedia"],
   "transports": ["local"],
@@ -232,8 +232,8 @@
         "fr": "Ampli Onkyo"
       },
       "description": {
-        "en": "Now playing, volume, input and power of a zone, with power, volume and mute buttons.",
-        "fr": "Lecture en cours, volume, entrée et état d'une zone, avec boutons marche, volume et muet."
+        "en": "Now playing, volume, input and power of a zone, with power, volume, mute and source buttons.",
+        "fr": "Lecture en cours, volume, entrée et état d'une zone, boutons marche, volume, muet et source."
       },
       "icon": "speaker",
       "settings": [
@@ -248,7 +248,7 @@
           "required": false
         }
       ],
-      "action_timeout_seconds": 15
+      "action_timeout_seconds": 30
     }
   ],
   "scene_triggers": [

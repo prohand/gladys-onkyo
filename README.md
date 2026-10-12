@@ -25,13 +25,14 @@ gave the inputs; older models get the standard list. A **maximum volume** settin
 caps every slider, button and scene.
 
 Since Gladys 5.1 it also extends the scene editor and the dashboard
-(`src/capabilities/`):
+(`src/capabilities/`); **Gladys 5.2.0 or later is required** for the widget's
+"Play a source" button form:
 
-| Capability     | Keys                                                                                   |
-| -------------- | -------------------------------------------------------------------------------------- |
-| Scene triggers | `source_changed`, `track_changed`, `connection_changed`                                |
-| Scene actions  | `play_source`, `set_mute`, `set_listening_mode`, `send_command`                        |
-| Widget         | `receiver` (volume, input, power, now playing, mute, listening mode, link + 4 buttons) |
+| Capability     | Keys                                                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Scene triggers | `source_changed`, `track_changed`, `connection_changed`                                                                       |
+| Scene actions  | `play_source`, `set_mute`, `set_listening_mode`, `send_command`                                                               |
+| Widget         | `receiver` (volume, input, power, now playing, mute, listening mode, link + up to 4 buttons, "Play a source" form in standby) |
 
 ## How it talks to the hardware
 

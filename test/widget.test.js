@@ -59,14 +59,15 @@ test('a receiver on: valid content, volume, input, what plays, four buttons', as
   hub.stop();
 });
 
-test('in standby: only the power button; unreachable: no button at all', async () => {
+test('in standby: power and Play a source; unreachable: no button at all', async () => {
   const { fake, hub } = await ready({ receiver: { state: { PWR: '00' } } });
   let content = buildWidgetContent(hub, {});
   assert.deepEqual(validateWidgetContent(content), []);
   assert.deepEqual(
-    buttons(content).map((b) => b.action.params.on),
-    [true],
+    buttons(content).map((b) => b.action.key),
+    [WIDGET_ACTIONS.POWER, WIDGET_ACTIONS.PLAY_SOURCE],
   );
+  assert.equal(buttons(content)[0].action.params.on, true);
 
   fake.refuse = true;
   fake.drop();
@@ -92,6 +93,56 @@ test('the buttons drive the receiver', async () => {
     handleWidgetAction(hub, { actionKey: 'dance', params: { device: MAIN } }),
     /Unknown widget action/,
   );
+  hub.stop();
+});
+
+test('the Play a source form lists the zone inputs and caps the volume field', async () => {
+  const { hub } = await ready({ config: { max_volume: 60 }, receiver: { state: { PWR: '00' } } });
+  const content = buildWidgetContent(hub, { settings: { device: MAIN } });
+  assert.deepEqual(validateWidgetContent(content), []);
+  const button = buttons(content).find((b) => b.action.key === WIDGET_ACTIONS.PLAY_SOURCE);
+  assert.deepEqual(button.action.params, { device: MAIN });
+  const [source, volume] = button.action.fields;
+  assert.equal(source.type, 'select');
+  assert.equal(source.required, true);
+  assert.ok(source.options.some((option) => option.value === '2B'));
+  assert.equal(source.default, '2B', 'pre-filled with the current input');
+  assert.equal(volume.type, 'number');
+  assert.equal(volume.required, undefined, 'empty keeps the volume');
+  assert.equal(volume.max, 60);
+  hub.stop();
+});
+
+test('Play a source wakes the zone, picks the input and sets the capped volume', async () => {
+  const { fake, hub } = await ready({
+    config: { max_volume: 60 },
+    receiver: { state: { PWR: '00' } },
+  });
+  fake.commands.length = 0;
+  const toast = await handleWidgetAction(
+    hub,
+    {
+      actionKey: WIDGET_ACTIONS.PLAY_SOURCE,
+      params: { device: MAIN },
+      values: { source: '23', volume: 90 },
+    },
+    { settleMs: 1 },
+  );
+  assert.deepEqual(fake.commands, ['PWR01', 'SLI23', 'MVL30']); // 60 % of 80 steps = 0x30
+  assert.deepEqual(toast, { en: 'Playing CD at 60 %', fr: 'Lecture : CD à 60 %' });
+  hub.stop();
+});
+
+test('Play a source relayed without values (core older than 5.2) sends nothing', async () => {
+  const { fake, hub } = await ready({ receiver: { state: { PWR: '00' } } });
+  fake.commands.length = 0;
+  const toast = await handleWidgetAction(hub, {
+    actionKey: WIDGET_ACTIONS.PLAY_SOURCE,
+    params: { device: MAIN },
+  });
+  assert.match(toast.en, /Gladys 5\.2/);
+  assert.ok(toast.fr);
+  assert.deepEqual(fake.commands, []);
   hub.stop();
 });
 

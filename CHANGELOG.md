@@ -6,9 +6,14 @@ All notable changes to this integration are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Dashboard widget: a **Play a source** button, while the zone is in standby, opens a form (input of the zone, optional volume capped by the maximum volume) and runs it like the `play_source` scene action.
+
 ### Changed
 
 - `@gladysassistant/integration-sdk` updated to 0.15.0.
+- Requires Gladys 5.2.0 (the first release relaying the values of a widget button form).
 
 ## [1.0.1] - 2026-10-11
 
