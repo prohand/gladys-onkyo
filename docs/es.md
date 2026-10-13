@@ -1,0 +1,137 @@
+# Onkyo
+
+Esta integración controla los **receptores AV Onkyo en red** desde Gladys, así
+como los modelos **Integra** y los **Pioneer** recientes que hablan el mismo
+protocolo (eISCP).
+
+Todo se queda en **local**: Gladys habla directamente con el receptor en su red
+(puerto 60128). Sin cuenta, sin nube, sin Internet.
+
+## Antes de empezar
+
+1. El receptor debe estar **en la red** (cable o Wi-Fi).
+2. Active la **espera de red** en el receptor: `Setup` → `Hardware` →
+   `Power Management` → `Network Standby` → `On` (los nombres varían un poco
+   según el modelo). Sin ella, el receptor se desconecta de la red en modo de
+   espera: Gladys lo pierde y no puede encenderlo.
+3. Asígnele una **IP fija** en su router (recomendado, no obligatorio: si la IP
+   cambia, la integración vuelve a encontrar el receptor por su dirección MAC).
+
+Algunos modelos antiguos solo aceptan una conexión a la vez: si la app Onkyo
+Remote está abierta, el receptor puede rechazar a Gladys. Cierre la app y
+espere un minuto.
+
+## Añadir un receptor
+
+1. Instale la integración desde la tienda de Gladys.
+2. Abra la pestaña **Descubrir**: Gladys busca receptores en la red.
+3. Añada los que aparezcan. Se crea un dispositivo por **zona**.
+
+¿El receptor no aparece? Puede estar en otra subred o en una VLAN: escriba su IP
+en **Direcciones de los receptores** (varias separadas por comas), guarde y
+vuelva a lanzar la búsqueda.
+
+## Ajustes
+
+| Ajuste                             | Qué hace                                                                                                                                                                     |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Direcciones de los receptores**  | Solo para un receptor que la búsqueda no encuentra. P. ej. `192.168.1.40, 192.168.1.41`                                                                                      |
+| **Zonas**                          | `Automático`: las zonas que declara el receptor (solo la zona principal en los modelos antiguos). O fuerce 1, 2 o 3 zonas.                                                   |
+| **Escala de volumen del receptor** | El valor de volumen más alto que muestra el receptor: 80 en la mayoría de los modelos, 200 en los recientes, que avanzan de 0,5 en 0,5. «Probar la conexión» indica cuál es. |
+| **Volumen máximo (%)**             | Gladys **nunca** envía un volumen superior, pida lo que pida un control deslizante, un botón o una escena. 80 % por defecto.                                                 |
+| **Registros detallados**           | Registra cada mensaje intercambiado con el receptor. Actívelo para entender un problema y desactívelo después.                                                               |
+
+El volumen es un **porcentaje de la escala**: 50 % en una escala de 80 muestra
+40 en el receptor.
+
+## Qué obtiene
+
+### Zona principal
+
+- **Encendido** (encendido / en espera)
+- **Volumen** (control deslizante, en %), **Subir volumen**, **Bajar volumen**,
+  **Silencio** (alternar)
+- **Entrada**: la lista de entradas, con los nombres que les dio en el receptor
+  (modelos recientes) o los nombres estándar (BD/DVD, CD, NET…)
+- **Modo de audición**: Estéreo, Direct, Dolby, DTS…
+- **Presintonía de radio** (1 a 40)
+- **Reproducir, Pausa, Detener, Anterior, Siguiente**: para el reproductor de
+  red, USB o Bluetooth del receptor
+- **Reproduciendo ahora**: artista y título
+
+### Zona 2 y zona 3
+
+Encendido, volumen, silencio, subir/bajar volumen, entrada. La entrada «Fuente
+de la zona principal» hace que la zona siga a la principal.
+
+Cualquier cambio hecho **con el mando a distancia, en el panel frontal o en otra
+app** aparece al instante en Gladys: el receptor lo comunica, Gladys no
+necesita consultarlo.
+
+## Escenas (Gladys 5.1+)
+
+### Activadores
+
+- **La entrada de un receptor ha cambiado**: alguien ha elegido otra entrada
+  (mando a distancia, panel frontal, app). Filtre por zona y por entrada.
+  Variables: `source` (código) y `source_name` (nombre). Las órdenes de la propia
+  Gladys nunca lo activan (sin bucles).
+- **Se reproduce una nueva pista**: el reproductor de red o USB ha pasado a otra
+  pista. Variables: `title`, `artist`, `album`.
+- **Un receptor se ha conectado o desconectado**: la conexión se ha caído
+  (desenchufado, espera de red desactivada) o ha vuelto. Un reinicio de Gladys
+  nunca lo activa.
+
+### Acciones
+
+- **Reproducir una entrada en un receptor**: enciende la zona si hace falta,
+  espera a que esté lista, elige la entrada y luego ajusta el volumen
+  (opcional). Pensada para «la radio en la cocina a las 7:00».
+- **Silenciar un receptor**: silenciar, activar el sonido o alternar.
+- **Cambiar el modo de audición** de la zona principal.
+- **Enviar un comando ISCP**: cualquier comando del protocolo Onkyo, para lo que
+  las demás acciones no cubren. La respuesta del receptor queda disponible para
+  las acciones siguientes.
+
+Ejemplo: «cuando se enciende la tele → Reproducir la entrada TV al 35 %».
+
+## Widget del panel (Gladys 5.1+)
+
+El widget **Receptor Onkyo** muestra una zona (elegida en sus ajustes, o la zona
+principal del primer receptor):
+
+- volumen y entrada;
+- estado: alimentación, pista en reproducción, sonido, modo de audición,
+  conexión;
+- botones: encender/en espera, bajar volumen, subir volumen y silenciar cuando
+  la zona está encendida; encender y **Reproducir una fuente** cuando está en
+  espera.
+
+**Reproducir una fuente** abre un pequeño formulario: elija una entrada de la
+zona (la actual viene preseleccionada) y, si lo desea, un volumen en %, limitado
+por el ajuste **Volumen máximo**. Gladys enciende la zona, espera a que esté
+lista y luego selecciona la entrada y ajusta el volumen, exactamente como la
+acción de escena. Este formulario requiere Gladys 5.2 o posterior, que la
+integración exige ahora.
+
+## Botones de la configuración
+
+- **Probar la conexión**: una línea por zona (conectada o no, encendido,
+  entrada, volumen) y las direcciones escritas que no han respondido.
+- **Enviar un comando ISCP**: pruebe un comando antes de ponerlo en una escena.
+  Ejemplos: `PWR01` (encender), `MVL20` (volumen), `SLI23` (entrada CD),
+  `LMDQSTN` (¿qué modo de audición?).
+
+## Solución de problemas
+
+| Problema                                      | Pista                                                                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| El receptor no aparece en «Descubrir»         | ¿Espera de red activada? ¿Misma red que Gladys? Si no, escriba su IP en «Direcciones de los receptores».           |
+| «Inaccesible» en cuanto pasa a modo de espera | Active la espera de red (ver arriba).                                                                              |
+| El volumen no coincide con la pantalla        | Ajuste la «Escala de volumen del receptor» (80 o 200 la mayoría de las veces).                                     |
+| Falta una entrada en la lista                 | Los modelos antiguos no anuncian sus entradas: se usa la lista estándar. Use «Enviar un comando ISCP» con `SLIxx`. |
+| Reproducir/Pausa no hacen nada                | Estas teclas controlan el propio reproductor de red/USB/Bluetooth del receptor, no una fuente HDMI.                |
+
+Para informar de un error, active **Registros detallados**, reproduzca el
+problema y adjunte los registros **sin** direcciones IP ni MAC:
+<https://github.com/prohand/gladys-onkyo/issues>

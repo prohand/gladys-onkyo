@@ -78,7 +78,7 @@ src/capabilities/          Gladys 5.1 scene actions, widget, Configuration butto
 `test/manifest.test.js` ties `gladys-assistant-integration.json` to the code: config defaults =
 `DEFAULT_CONFIG`, action/scene/widget handlers registered, trigger keys = `SCENE_TRIGGERS`, input
 and listening-mode option lists = `codes.js`, version = `package.json` = `docker_image` tag.
-Texts are `{ en, fr }` objects (labels, descriptions, placeholders, options). The catalog
+Texts are `{ en, fr, de, es }` objects (labels, descriptions, placeholders, options). The catalog
 `description` is 10–100 characters per language.
 
 ## Testing
@@ -90,8 +90,8 @@ TCP socket (answers queries and orders, `push()` simulates the remote, `drop()` 
 ## Conventions
 
 - Prettier formats, ESLint catches mistakes. Comments explain **why**, in English.
-- User-facing text is bilingual `{ en, fr }`; user docs in `docs/en.md` and `docs/fr.md`, kept in
-  sync.
+- User-facing text is `{ en, fr, de, es }`; user docs in `docs/en.md`, `docs/fr.md`, `docs/de.md`
+  and `docs/es.md`, kept in sync.
 - Every user-visible change adds a line under `## [Unreleased]` in `CHANGELOG.md` (`### Added`,
   `Changed`, `Fixed`, `Removed`, `Security`). Never write a version heading, never edit `version`
   or `docker_image` by hand: the Release workflow does it.

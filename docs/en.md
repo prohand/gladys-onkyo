@@ -23,8 +23,8 @@ open, the receiver may refuse Gladys. Close the app and wait a minute.
 ## Adding a receiver
 
 1. Install the integration from the Gladys store.
-2. Open the **Discovery** tab: Gladys looks for receivers on the network.
-3. Add the one(s) that show up. One device is created per **zone**.
+2. Open the **Discover** tab: Gladys looks for receivers on the network.
+3. Click **Add to Gladys** on the one(s) that show up. One device is created per **zone**.
 
 The receiver does not show up? It may sit on another subnet or a VLAN: type its
 IP in **Receiver addresses** (several separated by commas), save, then run the
@@ -117,7 +117,7 @@ Gladys 5.2 or later, which the integration now requires.
 
 | Problem                                   | Hint                                                                                                           |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| The receiver is not in Discovery          | Network standby on? Same network as Gladys? Otherwise type its IP in "Receiver addresses".                     |
+| The receiver is not in the Discover tab   | Network standby on? Same network as Gladys? Otherwise type its IP in "Receiver addresses".                     |
 | "Unreachable" as soon as it is in standby | Turn on network standby (see above).                                                                           |
 | The volume does not match the display     | Set "Volume scale of the receiver" (80 or 200 most of the time).                                               |
 | An input is missing from the list         | Older models do not announce their inputs: the standard list is used. Use "Send an ISCP command" with `SLIxx`. |

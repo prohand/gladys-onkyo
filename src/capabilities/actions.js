@@ -10,29 +10,79 @@
 import { isValidRawCommand } from '../onkyo/codes.js';
 import { parseHosts } from '../onkyo/discovery.js';
 
+// The languages of the Gladys interface; the core shows `en` for any other.
+export const LANGUAGES = ['en', 'fr', 'de', 'es'];
+
+const WORDS = {
+  en: {
+    unreachable: 'unreachable',
+    connected: 'connected',
+    on: 'on',
+    standby: 'standby',
+    muted: 'muted',
+  },
+  fr: {
+    unreachable: 'injoignable',
+    connected: 'connecté',
+    on: 'allumé',
+    standby: 'en veille',
+    muted: 'muet',
+  },
+  de: {
+    unreachable: 'nicht erreichbar',
+    connected: 'verbunden',
+    on: 'ein',
+    standby: 'Standby',
+    muted: 'stumm',
+  },
+  es: {
+    unreachable: 'inaccesible',
+    connected: 'conectado',
+    on: 'encendido',
+    standby: 'en espera',
+    muted: 'silenciado',
+  },
+};
+
 function zoneLine(zone, language) {
-  const fr = language === 'fr';
+  const words = WORDS[language] ?? WORDS.en;
   if (!zone.online) {
-    return `${zone.name} (${zone.host}) — ${fr ? 'injoignable' : 'unreachable'}`;
+    return `${zone.name} (${zone.host}) — ${words.unreachable}`;
   }
   const parts = [
-    zone.power === 1 ? (fr ? 'allumé' : 'on') : fr ? 'en veille' : 'standby',
+    zone.power === 1 ? words.on : words.standby,
     zone.sourceName,
     zone.volume === null ? null : `${zone.volume} %`,
-    zone.mute === 1 ? (fr ? 'muet' : 'muted') : null,
+    zone.mute === 1 ? words.muted : null,
   ].filter(Boolean);
-  return `${zone.name} (${zone.host}) — ${fr ? 'connecté' : 'connected'} : ${parts.join(', ')}`;
+  return `${zone.name} (${zone.host}) — ${words.connected} : ${parts.join(', ')}`;
 }
+
+const SCALE_HINTS = {
+  en: (volmax, steps) =>
+    `   The receiver reports a maximum volume of ${volmax} (scale set: ${steps} steps).`,
+  fr: (volmax, steps) =>
+    `   L'ampli annonce un volume maximal de ${volmax} (échelle réglée : ${steps} pas).`,
+  de: (volmax, steps) =>
+    `   Der Receiver meldet eine maximale Lautstärke von ${volmax} (eingestellte Skala: ${steps} Schritte).`,
+  es: (volmax, steps) =>
+    `   El receptor indica un volumen máximo de ${volmax} (escala configurada: ${steps} pasos).`,
+};
 
 function scaleHint(receiver, config, language) {
   const volmax = receiver.description?.zones?.find((zone) => zone.key === 'main')?.volmax;
   if (!volmax) {
     return null;
   }
-  return language === 'fr'
-    ? `   L'ampli annonce un volume maximal de ${volmax} (échelle réglée : ${config.volume_resolution} pas).`
-    : `   The receiver reports a maximum volume of ${volmax} (scale set: ${config.volume_resolution} steps).`;
+  return (SCALE_HINTS[language] ?? SCALE_HINTS.en)(volmax, config.volume_resolution);
 }
+
+const NO_ANSWER = {
+  en: (host, port) => `${host}:${port} — no answer (address, network standby, firewall?)`,
+  fr: (host, port) => `${host}:${port} — aucune réponse (adresse, veille réseau, pare-feu ?)`,
+  de: (host, port) => `${host}:${port} — keine Antwort (Adresse, Netzwerk-Standby, Firewall?)`,
+  es: (host, port) => `${host}:${port} — sin respuesta (¿dirección, espera de red, cortafuegos?)`,
+};
 
 export async function testConnection(hub) {
   const silent = (await hub.probeConfiguredHosts())
@@ -42,13 +92,15 @@ export async function testConnection(hub) {
 
   if (hub.list.length === 0 && silent.length === 0) {
     return {
-      en: 'No receiver yet. Open the Discovery tab to scan the network, or type the address of the receiver in the configuration.',
+      en: 'No receiver yet. Open the Discover tab to scan the network, or type the address of the receiver in the configuration.',
       fr: "Aucun ampli pour l'instant. Ouvrez l'onglet Découverte pour scanner le réseau, ou saisissez l'adresse de l'ampli dans la configuration.",
+      de: 'Noch kein Receiver. Öffne den Tab „Entdecken“, um das Netzwerk zu durchsuchen, oder gib die Adresse des Receivers in der Konfiguration ein.',
+      es: 'Todavía no hay ningún receptor. Abra la pestaña «Descubrir» para buscar en la red, o escriba la dirección del receptor en la configuración.',
     };
   }
 
   const message = {};
-  for (const language of ['en', 'fr']) {
+  for (const language of LANGUAGES) {
     const lines = [];
     for (const receiver of hub.list) {
       for (const zone of hub.allZones().filter((z) => z.id === receiver.id)) {
@@ -60,11 +112,7 @@ export async function testConnection(hub) {
       }
     }
     for (const { host, port } of silent) {
-      lines.push(
-        language === 'fr'
-          ? `${host}:${port} — aucune réponse (adresse, veille réseau, pare-feu ?)`
-          : `${host}:${port} — no answer (address, network standby, firewall?)`,
-      );
+      lines.push(NO_ANSWER[language](host, port));
     }
     message[language] = lines.join('\n');
   }
@@ -78,6 +126,8 @@ export async function sendCommand(hub, fields) {
     return {
       en: `"${typed}" is not an ISCP command. Examples: PWR01 (on), MVL20 (volume), SLI23 (CD input).`,
       fr: `« ${typed} » n'est pas une commande ISCP. Exemples : PWR01 (allumer), MVL20 (volume), SLI23 (entrée CD).`,
+      de: `„${typed}“ ist kein ISCP-Befehl. Beispiele: PWR01 (einschalten), MVL20 (Lautstärke), SLI23 (Eingang CD).`,
+      es: `«${typed}» no es un comando ISCP. Ejemplos: PWR01 (encender), MVL20 (volumen), SLI23 (entrada CD).`,
     };
   }
   const { receiver } = hub.target(fields.device);
@@ -86,6 +136,8 @@ export async function sendCommand(hub, fields) {
     return {
       en: `${command} sent. The receiver answered nothing (normal for some commands).`,
       fr: `${command} envoyée. L'ampli n'a rien répondu (normal pour certaines commandes).`,
+      de: `${command} gesendet. Der Receiver hat nicht geantwortet (bei manchen Befehlen normal).`,
+      es: `${command} enviado. El receptor no ha respondido (normal con algunos comandos).`,
     };
   }
   // An NRI answer is a whole XML document: the start is enough here.
@@ -93,5 +145,7 @@ export async function sendCommand(hub, fields) {
   return {
     en: `${command} sent. Answer: ${shown}`,
     fr: `${command} envoyée. Réponse : ${shown}`,
+    de: `${command} gesendet. Antwort: ${shown}`,
+    es: `${command} enviado. Respuesta: ${shown}`,
   };
 }
