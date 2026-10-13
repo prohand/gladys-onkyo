@@ -63,6 +63,8 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
           text: {
             en: 'No Onkyo receiver yet. Add one from the Discovery tab of the integration.',
             fr: "Aucun ampli Onkyo pour l'instant. Ajoutez-en un depuis l'onglet Découverte de l'intégration.",
+            de: 'Noch kein Onkyo-Receiver. Fügen Sie einen über den Tab „Entdecken“ der Integration hinzu.',
+            es: 'Todavía no hay ningún receptor Onkyo. Añada uno desde la pestaña «Descubrir» de la integración.',
           },
         },
       ],
@@ -75,7 +77,7 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
     components.push(
       {
         type: 'value',
-        label: { en: 'Volume', fr: 'Volume' },
+        label: { en: 'Volume', fr: 'Volume', de: 'Lautstärke', es: 'Volumen' },
         icon: zone.mute === 1 ? 'volume-x' : 'volume-2',
         value: zone.volume ?? '–',
         unit: zone.volume === null ? undefined : '%',
@@ -83,7 +85,7 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
       },
       {
         type: 'value',
-        label: { en: 'Input', fr: 'Entrée' },
+        label: { en: 'Input', fr: 'Entrée', de: 'Eingang', es: 'Entrada' },
         icon: 'log-in',
         value: clip(zone.sourceName ?? '–', 12),
         color: WIDGET_COLORS.INFO,
@@ -93,30 +95,36 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
 
   const items = [
     {
-      label: { en: 'Link', fr: 'Liaison' },
+      label: { en: 'Link', fr: 'Liaison', de: 'Verbindung', es: 'Conexión' },
       icon: 'wifi',
       value: zone.online
-        ? { en: 'Connected', fr: 'Connecté' }
-        : { en: 'Unreachable', fr: 'Injoignable' },
+        ? { en: 'Connected', fr: 'Connecté', de: 'Verbunden', es: 'Conectado' }
+        : { en: 'Unreachable', fr: 'Injoignable', de: 'Nicht erreichbar', es: 'Inaccesible' },
       color: zone.online ? WIDGET_COLORS.SUCCESS : WIDGET_COLORS.DANGER,
     },
   ];
   if (zone.online) {
     items.unshift({
-      label: { en: 'Power', fr: 'Alimentation' },
+      label: { en: 'Power', fr: 'Alimentation', de: 'Betrieb', es: 'Alimentación' },
       icon: 'power',
-      value: zone.power === 1 ? { en: 'On', fr: 'Allumé' } : { en: 'Standby', fr: 'En veille' },
+      value:
+        zone.power === 1
+          ? { en: 'On', fr: 'Allumé', de: 'Ein', es: 'Encendido' }
+          : { en: 'Standby', fr: 'En veille', de: 'Standby', es: 'En espera' },
       color: zone.power === 1 ? WIDGET_COLORS.SUCCESS : WIDGET_COLORS.NEUTRAL,
     });
     items.push({
-      label: { en: 'Sound', fr: 'Son' },
+      label: { en: 'Sound', fr: 'Son', de: 'Ton', es: 'Sonido' },
       icon: 'volume-1',
-      value: zone.mute === 1 ? { en: 'Muted', fr: 'Coupé' } : { en: 'On', fr: 'Actif' },
+      value:
+        zone.mute === 1
+          ? { en: 'Muted', fr: 'Coupé', de: 'Stumm', es: 'Silenciado' }
+          : { en: 'On', fr: 'Actif', de: 'Ein', es: 'Activo' },
       color: zone.mute === 1 ? WIDGET_COLORS.WARNING : WIDGET_COLORS.NEUTRAL,
     });
     if (zone.power === 1 && zone.nowPlaying) {
       items.push({
-        label: { en: 'Playing', fr: 'En lecture' },
+        label: { en: 'Playing', fr: 'En lecture', de: 'Wiedergabe', es: 'Reproduciendo' },
         icon: 'music',
         value: clip(zone.nowPlaying, 40),
         color: WIDGET_COLORS.PRIMARY,
@@ -124,7 +132,12 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
     }
     if (zone.listeningMode) {
       items.push({
-        label: { en: 'Listening mode', fr: "Mode d'écoute" },
+        label: {
+          en: 'Listening mode',
+          fr: "Mode d'écoute",
+          de: 'Wiedergabemodus',
+          es: 'Modo de audición',
+        },
         icon: 'sliders',
         value: clip(listeningModeLabel(zone.listeningMode), 40),
         color: WIDGET_COLORS.NEUTRAL,
@@ -137,7 +150,10 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
     const device = zone.deviceExternalId;
     components.push({
       type: 'button',
-      label: zone.power === 1 ? { en: 'Standby', fr: 'Veille' } : { en: 'Turn on', fr: 'Allumer' },
+      label:
+        zone.power === 1
+          ? { en: 'Standby', fr: 'Veille', de: 'Standby', es: 'En espera' }
+          : { en: 'Turn on', fr: 'Allumer', de: 'Einschalten', es: 'Encender' },
       icon: 'power',
       style: zone.power === 1 ? 'secondary' : 'primary',
       action: { key: WIDGET_ACTIONS.POWER, params: { device, on: zone.power !== 1 } },
@@ -146,14 +162,14 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
       components.push(
         {
           type: 'button',
-          label: { en: 'Vol −', fr: 'Vol −' },
+          label: { en: 'Vol −', fr: 'Vol −', de: 'Vol −', es: 'Vol −' },
           icon: 'minus',
           style: 'secondary',
           action: { key: WIDGET_ACTIONS.VOLUME_DOWN, params: { device } },
         },
         {
           type: 'button',
-          label: { en: 'Vol +', fr: 'Vol +' },
+          label: { en: 'Vol +', fr: 'Vol +', de: 'Vol +', es: 'Vol +' },
           icon: 'plus',
           style: 'secondary',
           action: { key: WIDGET_ACTIONS.VOLUME_UP, params: { device } },
@@ -161,7 +177,9 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
         {
           type: 'button',
           label:
-            zone.mute === 1 ? { en: 'Unmute', fr: 'Remettre le son' } : { en: 'Mute', fr: 'Muet' },
+            zone.mute === 1
+              ? { en: 'Unmute', fr: 'Remettre le son', de: 'Ton an', es: 'Activar sonido' }
+              : { en: 'Mute', fr: 'Muet', de: 'Stumm', es: 'Silenciar' },
           icon: zone.mute === 1 ? 'volume-2' : 'volume-x',
           style: 'secondary',
           action: { key: WIDGET_ACTIONS.MUTE, params: { device } },
@@ -186,10 +204,10 @@ function playSourceButton(zone, maxVolume) {
     key: 'source',
     type: 'select',
     required: true,
-    label: { en: 'Input', fr: 'Entrée' },
+    label: { en: 'Input', fr: 'Entrée', de: 'Eingang', es: 'Entrada' },
     options: zone.inputs.map(({ value, label }) => {
       const text = clip(label, OPTION_LABEL_MAX);
-      return { value, label: { en: text, fr: text } };
+      return { value, label: { en: text, fr: text, de: text, es: text } };
     }),
   };
   if (zone.inputs.some((input) => input.value === zone.source)) {
@@ -197,7 +215,12 @@ function playSourceButton(zone, maxVolume) {
   }
   return {
     type: 'button',
-    label: { en: 'Play a source', fr: 'Lire une source' },
+    label: {
+      en: 'Play a source',
+      fr: 'Lire une source',
+      de: 'Quelle abspielen',
+      es: 'Reproducir una fuente',
+    },
     icon: 'play',
     style: 'secondary',
     action: {
@@ -210,8 +233,8 @@ function playSourceButton(zone, maxVolume) {
           type: 'number',
           min: 0,
           max: maxVolume,
-          label: { en: 'Volume (%)', fr: 'Volume (%)' },
-          placeholder: { en: 'Unchanged', fr: 'Inchangé' },
+          label: { en: 'Volume (%)', fr: 'Volume (%)', de: 'Lautstärke (%)', es: 'Volumen (%)' },
+          placeholder: { en: 'Unchanged', fr: 'Inchangé', de: 'Unverändert', es: 'Sin cambios' },
         },
       ],
     },
@@ -230,6 +253,8 @@ async function playSource(hub, params, values, options) {
     return {
       en: 'Choose the input in the form of the button (Gladys 5.2 or later).',
       fr: "Choisissez l'entrée dans le formulaire du bouton (Gladys 5.2 ou plus récent).",
+      de: 'Wählen Sie den Eingang im Formular der Schaltfläche (Gladys 5.2 oder neuer).',
+      es: 'Elija la entrada en el formulario del botón (Gladys 5.2 o posterior).',
     };
   }
   const outputs = await SCENE_ACTIONS.play_source(
@@ -242,10 +267,17 @@ async function playSource(hub, params, values, options) {
     hub.findZone(params.device)?.inputs.find((input) => input.value === outputs.source)?.label ??
     outputs.source;
   return outputs.volume === undefined
-    ? { en: `Playing ${name}`, fr: `Lecture : ${name}` }
+    ? {
+        en: `Playing ${name}`,
+        fr: `Lecture : ${name}`,
+        de: `Wiedergabe: ${name}`,
+        es: `Reproduciendo ${name}`,
+      }
     : {
         en: `Playing ${name} at ${outputs.volume} %`,
         fr: `Lecture : ${name} à ${outputs.volume} %`,
+        de: `Wiedergabe: ${name} mit ${outputs.volume} %`,
+        es: `Reproduciendo ${name} al ${outputs.volume} %`,
       };
 }
 
@@ -266,8 +298,13 @@ export async function handleWidgetAction(hub, { actionKey, params = {}, values }
     case WIDGET_ACTIONS.POWER:
       await receiver.setPower(zone, params.on === true);
       return params.on === true
-        ? { en: 'Turning on', fr: 'Allumage' }
-        : { en: 'Going to standby', fr: 'Mise en veille' };
+        ? { en: 'Turning on', fr: 'Allumage', de: 'Wird eingeschaltet', es: 'Encendiendo' }
+        : {
+            en: 'Going to standby',
+            fr: 'Mise en veille',
+            de: 'Wechsel in Standby',
+            es: 'Pasando a espera',
+          };
     case WIDGET_ACTIONS.VOLUME_DOWN:
       await hub.volumeStep(receiver, zone, false);
       return undefined;

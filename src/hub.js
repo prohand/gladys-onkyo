@@ -354,6 +354,8 @@ export class ReceiverHub {
         message: {
           en: 'No receiver yet: open the Discovery tab, or type its address in the configuration.',
           fr: "Aucun ampli pour l'instant : ouvrez l'onglet Découverte, ou saisissez son adresse dans la configuration.",
+          de: 'Noch kein Receiver: Öffnen Sie den Tab „Entdecken“ oder geben Sie seine Adresse in der Konfiguration ein.',
+          es: 'Todavía no hay ningún receptor: abra la pestaña «Descubrir» o escriba su dirección en la configuración.',
         },
       };
     }
@@ -367,6 +369,8 @@ export class ReceiverHub {
       message: {
         en: `Unreachable: ${names}. Check that it is plugged in and that its network standby is on.`,
         fr: `Injoignable : ${names}. Vérifiez qu'il est branché et que sa veille réseau est activée.`,
+        de: `Nicht erreichbar: ${names}. Prüfen Sie, ob er eingesteckt und Netzwerk-Standby aktiviert ist.`,
+        es: `Inaccesible: ${names}. Compruebe que está enchufado y que su espera de red está activada.`,
       },
     };
   }

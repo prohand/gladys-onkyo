@@ -67,6 +67,7 @@ test('no receiver yet: connected, with the way to add one', async () => {
   await settle(10);
   assert.equal(gladys.connectionStatuses.at(-1).connected, true);
   assert.match(gladys.connectionStatuses.at(-1).message.fr, /Découverte/);
+  assert.deepEqual(Object.keys(gladys.connectionStatuses.at(-1).message), ['en', 'fr', 'de', 'es']);
   hub.stop();
 });
 

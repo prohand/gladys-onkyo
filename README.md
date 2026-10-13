@@ -9,7 +9,8 @@ Built on the official
 and the SDK
 [`@gladysassistant/integration-sdk`](https://github.com/GladysAssistant/integration-sdk-js).
 
-User documentation: [English](./docs/en.md) · [Français](./docs/fr.md).
+User documentation: [English](./docs/en.md) · [Français](./docs/fr.md) ·
+[Deutsch](./docs/de.md) · [Español](./docs/es.md).
 
 ## What it does
 
@@ -76,7 +77,7 @@ receivers.
 │     ├─ scenes.js              # scene actions
 │     ├─ widget.js              # dashboard widget
 │     └─ actions.js             # Configuration screen buttons
-├─ docs/en.md, docs/fr.md       # user documentation (re-hosted by Gladys)
+├─ docs/{en,fr,de,es}.md        # user documentation (re-hosted by Gladys)
 ├─ test/                        # node --test, no network, no hardware
 ├─ gladys-assistant-integration.json
 ├─ Dockerfile                   # Node 24 Alpine, read-only rootfs ready

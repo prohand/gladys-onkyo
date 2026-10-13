@@ -15,6 +15,11 @@ test('test_connection: one line per zone, and the addresses that answered nothin
   const message = await testConnection(ctx.hub);
   assert.match(message.en, /Onkyo TX-NR686 \(192\.168\.1\.40\) — connected : on, NET, 50 %/);
   assert.match(message.fr, /10\.9\.9\.9:60128 — aucune réponse/);
+  assert.deepEqual(Object.keys(message), ['en', 'fr', 'de', 'es']);
+  assert.match(message.de, /— verbunden : ein, NET, 50 %/);
+  assert.match(message.de, /10\.9\.9\.9:60128 — keine Antwort/);
+  assert.match(message.es, /— conectado : encendido, NET, 50 %/);
+  assert.match(message.es, /10\.9\.9\.9:60128 — sin respuesta/);
   ctx.hub.stop();
 });
 
@@ -22,6 +27,8 @@ test('test_connection with nothing at all says how to start', async () => {
   const { hub } = setupHub({ created: [] });
   const message = await testConnection(hub);
   assert.match(message.en, /Discovery tab/);
+  assert.match(message.de, /„Entdecken“/);
+  assert.match(message.es, /«Descubrir»/);
 });
 
 test('send_command: answer shown, bad command explained', async () => {
@@ -32,6 +39,8 @@ test('send_command: answer shown, bad command explained', async () => {
     (await sendCommand(ctx.hub, { device: MAIN, command: 'MVLQSTN' })).en,
     /Answer: MVL28/,
   );
-  assert.match((await sendCommand(ctx.hub, { device: MAIN, command: 'PW' })).fr, /n'est pas/);
+  const refused = await sendCommand(ctx.hub, { device: MAIN, command: 'PW' });
+  assert.match(refused.fr, /n'est pas/);
+  assert.deepEqual(Object.keys(refused), ['en', 'fr', 'de', 'es']);
   ctx.hub.stop();
 });

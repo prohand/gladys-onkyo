@@ -1,0 +1,137 @@
+# Onkyo
+
+Diese Integration steuert **Onkyo-AV-Receiver im Netzwerk** aus Gladys heraus,
+ebenso die Modelle von **Integra** und die neueren von **Pioneer**, die dasselbe
+Protokoll (eISCP) sprechen.
+
+Alles bleibt **lokal**: Gladys spricht direkt in Ihrem Netzwerk mit dem
+Receiver (Port 60128). Kein Konto, keine Cloud, kein Internet.
+
+## Bevor Sie beginnen
+
+1. Der Receiver muss **im Netzwerk** sein (Kabel oder WLAN).
+2. Aktivieren Sie am Receiver **Netzwerk-Standby**: `Setup` → `Hardware` →
+   `Power Management` → `Network Standby` → `On` (die Bezeichnungen variieren je
+   nach Modell etwas). Ohne diese Option trennt sich der Receiver im Standby vom
+   Netzwerk: Gladys verliert ihn und kann ihn nicht einschalten.
+3. Geben Sie ihm eine **feste IP** in Ihrem Router (empfohlen, aber nicht nötig:
+   Ändert sich die IP, findet die Integration den Receiver über seine
+   MAC-Adresse wieder).
+
+Manche ältere Modelle akzeptieren nur eine Verbindung gleichzeitig: Ist die App
+Onkyo Remote geöffnet, kann der Receiver Gladys ablehnen. Schließen Sie die App
+und warten Sie eine Minute.
+
+## Einen Receiver hinzufügen
+
+1. Installieren Sie die Integration aus dem Gladys-Store.
+2. Öffnen Sie den Tab **Entdecken**: Gladys sucht im Netzwerk nach Receivern.
+3. Fügen Sie die angezeigten Receiver hinzu. Pro **Zone** wird ein Gerät
+   angelegt.
+
+Der Receiver erscheint nicht? Er befindet sich vielleicht in einem anderen
+Subnetz oder einem VLAN: Geben Sie seine IP unter **Adressen der Receiver** ein
+(mehrere durch Kommas getrennt), speichern Sie und starten Sie die Suche erneut.
+
+## Einstellungen
+
+| Einstellung                       | Wirkung                                                                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Adressen der Receiver**         | Nur für einen Receiver, den die Suche nicht findet. Z. B. `192.168.1.40, 192.168.1.41`                                                                                    |
+| **Zonen**                         | `Automatisch`: die Zonen, die der Receiver meldet (bei älteren Modellen nur die Hauptzone). Oder erzwingen Sie 1, 2 oder 3 Zonen.                                         |
+| **Lautstärkeskala des Receivers** | Der höchste Lautstärkewert, den der Receiver anzeigt: 80 bei den meisten Modellen, 200 bei neueren, die in 0,5er-Schritten zählen. „Verbindung testen“ zeigt den Wert an. |
+| **Maximale Lautstärke (%)**       | Gladys sendet **nie** eine höhere Lautstärke, egal was ein Schieberegler, eine Taste oder eine Szene verlangt. Standardmäßig 80 %.                                        |
+| **Detaillierte Protokolle**       | Protokolliert jede mit dem Receiver ausgetauschte Nachricht. Aktivieren Sie es, um ein Problem zu verstehen, und schalten Sie es danach wieder aus.                       |
+
+Die Lautstärke ist ein **Prozentsatz der Skala**: 50 % bei einer Skala von 80
+zeigt am Receiver 40 an.
+
+## Was Sie erhalten
+
+### Hauptzone
+
+- **Ein/Aus** (ein / Standby)
+- **Lautstärke** (Schieberegler, in %), **Lauter**, **Leiser**, **Stumm**
+  (Umschalten)
+- **Eingang**: die Liste der Eingänge, mit den Namen, die Sie ihnen am Receiver
+  gegeben haben (neuere Modelle), oder den Standardnamen (BD/DVD, CD, NET…)
+- **Wiedergabemodus**: Stereo, Direct, Dolby, DTS…
+- **Tuner-Senderspeicher** (1 bis 40)
+- **Play, Pause, Stop, Zurück, Weiter**: für den Netzwerk-, USB- oder
+  Bluetooth-Player des Receivers
+- **Aktuelle Wiedergabe**: Interpret und Titel
+
+### Zone 2 und Zone 3
+
+Ein/Aus, Lautstärke, Stumm, lauter/leiser, Eingang. Der Eingang „Quelle der
+Hauptzone“ lässt die Zone der Hauptzone folgen.
+
+Jede Änderung **über die Fernbedienung, die Gerätefront oder eine andere App**
+erscheint sofort in Gladys: Der Receiver meldet sie, Gladys muss nicht abfragen.
+
+## Szenen (Gladys 5.1+)
+
+### Auslöser
+
+- **Der Eingang eines Receivers hat sich geändert**: Jemand hat einen anderen
+  Eingang gewählt (Fernbedienung, Gerätefront, App). Filter nach Zone und
+  Eingang. Variablen: `source` (Code) und `source_name` (Name). Befehle von
+  Gladys selbst lösen ihn nie aus (keine Schleife).
+- **Ein neuer Titel wird abgespielt**: Der Netzwerk- oder USB-Player ist zu einem
+  anderen Titel gewechselt. Variablen: `title`, `artist`, `album`.
+- **Ein Receiver ist online oder offline gegangen**: Die Verbindung ist
+  abgebrochen (ausgesteckt, Netzwerk-Standby aus) oder wiederhergestellt. Ein
+  Neustart von Gladys löst ihn nie aus.
+
+### Aktionen
+
+- **Eingang auf einem Receiver abspielen**: Schaltet die Zone bei Bedarf ein,
+  wartet auf sie, wählt den Eingang und stellt dann die Lautstärke ein
+  (optional). Gedacht für „das Radio in der Küche um 7:00 Uhr“.
+- **Receiver stummschalten**: stumm, Ton ein oder umschalten.
+- **Wiedergabemodus einstellen** für die Hauptzone.
+- **ISCP-Befehl senden**: beliebiger Befehl des Onkyo-Protokolls, für alles, was
+  die anderen Aktionen nicht abdecken. Die Antwort des Receivers steht den
+  folgenden Aktionen zur Verfügung.
+
+Beispiel: „Wenn sich der Fernseher einschaltet → Eingang TV mit 35 % abspielen“.
+
+## Dashboard-Widget (Gladys 5.1+)
+
+Das Widget **Onkyo-Receiver** zeigt eine Zone (in seinen Einstellungen gewählt,
+sonst die Hauptzone des ersten Receivers):
+
+- Lautstärke und Eingang;
+- Status: Betrieb, laufender Titel, Ton, Wiedergabemodus, Verbindung;
+- Tasten: Ein/Standby, leiser, lauter, stumm, wenn die Zone eingeschaltet ist;
+  Einschalten und **Quelle abspielen**, wenn sie im Standby ist.
+
+**Quelle abspielen** öffnet ein kleines Formular: Wählen Sie einen Eingang der
+Zone (der aktuelle ist vorausgefüllt) und, wenn Sie möchten, eine Lautstärke in
+%, begrenzt durch die Einstellung **Maximale Lautstärke**. Gladys schaltet die
+Zone ein, wartet auf sie, wählt dann den Eingang und stellt die Lautstärke ein,
+genau wie die Szenen-Aktion. Dieses Formular erfordert Gladys 5.2 oder neuer,
+was die Integration inzwischen voraussetzt.
+
+## Schaltflächen der Konfiguration
+
+- **Verbindung testen**: eine Zeile pro Zone (verbunden oder nicht, Betrieb,
+  Eingang, Lautstärke) und die eingegebenen Adressen, die nicht geantwortet
+  haben.
+- **ISCP-Befehl senden**: Probieren Sie einen Befehl aus, bevor Sie ihn in eine
+  Szene einbauen. Beispiele: `PWR01` (einschalten), `MVL20` (Lautstärke),
+  `SLI23` (Eingang CD), `LMDQSTN` (welcher Wiedergabemodus?).
+
+## Fehlerbehebung
+
+| Problem                                        | Hinweis                                                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Der Receiver erscheint nicht unter „Entdecken“ | Netzwerk-Standby aktiviert? Im selben Netzwerk wie Gladys? Sonst geben Sie seine IP unter „Adressen der Receiver“ ein.         |
+| „Nicht erreichbar“, sobald er im Standby ist   | Aktivieren Sie Netzwerk-Standby (siehe oben).                                                                                  |
+| Die Lautstärke passt nicht zur Anzeige         | Stellen Sie die „Lautstärkeskala des Receivers“ ein (meist 80 oder 200).                                                       |
+| Ein Eingang fehlt in der Liste                 | Ältere Modelle melden ihre Eingänge nicht: Dann wird die Standardliste verwendet. Nutzen Sie „ISCP-Befehl senden“ mit `SLIxx`. |
+| Play/Pause bewirken nichts                     | Diese Tasten steuern den eigenen Netzwerk-/USB-/Bluetooth-Player des Receivers, keine HDMI-Quelle.                             |
+
+Für einen Fehlerbericht aktivieren Sie **Detaillierte Protokolle**, reproduzieren
+Sie das Problem und hängen Sie die Protokolle **ohne** IP- oder MAC-Adressen an:
+<https://github.com/prohand/gladys-onkyo/issues>

@@ -23,6 +23,21 @@ async function ready(options) {
   return ctx;
 }
 
+// The languages of the Gladys interface: every text of a card carries them.
+function assertTranslated(node, path = 'content') {
+  if (Array.isArray(node)) {
+    node.forEach((child, index) => assertTranslated(child, `${path}[${index}]`));
+  } else if (node && typeof node === 'object') {
+    if (typeof node.en === 'string') {
+      assert.deepEqual(Object.keys(node), ['en', 'fr', 'de', 'es'], path);
+      return;
+    }
+    for (const [key, child] of Object.entries(node)) {
+      assertTranslated(child, `${path}.${key}`);
+    }
+  }
+}
+
 const buttons = (content) => content.components.filter((c) => c.type === 'button');
 
 test('no receiver: a valid empty state that says what to do', () => {
@@ -30,6 +45,9 @@ test('no receiver: a valid empty state that says what to do', () => {
   const content = buildWidgetContent(hub, {});
   assert.deepEqual(validateWidgetContent(content), []);
   assert.match(content.components[0].text.fr, /Découverte/);
+  assert.match(content.components[0].text.de, /Entdecken/);
+  assert.match(content.components[0].text.es, /Descubrir/);
+  assertTranslated(content);
 });
 
 test('a receiver on: valid content, volume, input, what plays, four buttons', async () => {
@@ -46,6 +64,7 @@ test('a receiver on: valid content, volume, input, what plays, four buttons', as
     .find((c) => c.type === 'status')
     .items.find((item) => item.label.en === 'Playing');
   assert.equal(playing.value.length, 40);
+  assertTranslated(content);
   assert.deepEqual(
     buttons(content).map((b) => b.action.key),
     [
@@ -89,6 +108,7 @@ test('the buttons drive the receiver', async () => {
   });
   assert.deepEqual(fake.commands, ['MVLUP', 'AMTTG', 'PWR00']);
   assert.equal(toast.fr, 'Mise en veille');
+  assertTranslated(toast);
   await assert.rejects(
     handleWidgetAction(hub, { actionKey: 'dance', params: { device: MAIN } }),
     /Unknown widget action/,
@@ -110,6 +130,7 @@ test('the Play a source form lists the zone inputs and caps the volume field', a
   assert.equal(volume.type, 'number');
   assert.equal(volume.required, undefined, 'empty keeps the volume');
   assert.equal(volume.max, 60);
+  assertTranslated(content);
   hub.stop();
 });
 
@@ -129,7 +150,12 @@ test('Play a source wakes the zone, picks the input and sets the capped volume',
     { settleMs: 1 },
   );
   assert.deepEqual(fake.commands, ['PWR01', 'SLI23', 'MVL30']); // 60 % of 80 steps = 0x30
-  assert.deepEqual(toast, { en: 'Playing CD at 60 %', fr: 'Lecture : CD à 60 %' });
+  assert.deepEqual(toast, {
+    en: 'Playing CD at 60 %',
+    fr: 'Lecture : CD à 60 %',
+    de: 'Wiedergabe: CD mit 60 %',
+    es: 'Reproduciendo CD al 60 %',
+  });
   hub.stop();
 });
 
@@ -141,7 +167,7 @@ test('Play a source relayed without values (core older than 5.2) sends nothing',
     params: { device: MAIN },
   });
   assert.match(toast.en, /Gladys 5\.2/);
-  assert.ok(toast.fr);
+  assertTranslated(toast);
   assert.deepEqual(fake.commands, []);
   hub.stop();
 });
