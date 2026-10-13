@@ -4,57 +4,57 @@ Diese Integration steuert **Onkyo-AV-Receiver im Netzwerk** aus Gladys heraus,
 ebenso die Modelle von **Integra** und die neueren von **Pioneer**, die dasselbe
 Protokoll (eISCP) sprechen.
 
-Alles bleibt **lokal**: Gladys spricht direkt in Ihrem Netzwerk mit dem
+Alles bleibt **lokal**: Gladys spricht direkt in deinem Netzwerk mit dem
 Receiver (Port 60128). Kein Konto, keine Cloud, kein Internet.
 
-## Bevor Sie beginnen
+## Bevor du beginnst
 
 1. Der Receiver muss **im Netzwerk** sein (Kabel oder WLAN).
-2. Aktivieren Sie am Receiver **Netzwerk-Standby**: `Setup` → `Hardware` →
+2. Aktiviere am Receiver **Netzwerk-Standby**: `Setup` → `Hardware` →
    `Power Management` → `Network Standby` → `On` (die Bezeichnungen variieren je
    nach Modell etwas). Ohne diese Option trennt sich der Receiver im Standby vom
    Netzwerk: Gladys verliert ihn und kann ihn nicht einschalten.
-3. Geben Sie ihm eine **feste IP** in Ihrem Router (empfohlen, aber nicht nötig:
+3. Gib ihm eine **feste IP** in deinem Router (empfohlen, aber nicht nötig:
    Ändert sich die IP, findet die Integration den Receiver über seine
    MAC-Adresse wieder).
 
 Manche ältere Modelle akzeptieren nur eine Verbindung gleichzeitig: Ist die App
-Onkyo Remote geöffnet, kann der Receiver Gladys ablehnen. Schließen Sie die App
-und warten Sie eine Minute.
+Onkyo Remote geöffnet, kann der Receiver Gladys ablehnen. Schließe die App
+und warte eine Minute.
 
 ## Einen Receiver hinzufügen
 
-1. Installieren Sie die Integration aus dem Gladys-Store.
-2. Öffnen Sie den Tab **Entdecken**: Gladys sucht im Netzwerk nach Receivern.
-3. Fügen Sie die angezeigten Receiver hinzu. Pro **Zone** wird ein Gerät
+1. Installiere die Integration aus dem Gladys-Store.
+2. Öffne den Tab **Entdecken**: Gladys sucht im Netzwerk nach Receivern.
+3. Füge die angezeigten Receiver hinzu. Pro **Zone** wird ein Gerät
    angelegt.
 
 Der Receiver erscheint nicht? Er befindet sich vielleicht in einem anderen
-Subnetz oder einem VLAN: Geben Sie seine IP unter **Adressen der Receiver** ein
-(mehrere durch Kommas getrennt), speichern Sie und starten Sie die Suche erneut.
+Subnetz oder einem VLAN: Gib seine IP unter **Adressen der Receiver** ein
+(mehrere durch Kommas getrennt), speichere und starte die Suche erneut.
 
 ## Einstellungen
 
 | Einstellung                       | Wirkung                                                                                                                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Adressen der Receiver**         | Nur für einen Receiver, den die Suche nicht findet. Z. B. `192.168.1.40, 192.168.1.41`                                                                                    |
-| **Zonen**                         | `Automatisch`: die Zonen, die der Receiver meldet (bei älteren Modellen nur die Hauptzone). Oder erzwingen Sie 1, 2 oder 3 Zonen.                                         |
+| **Zonen**                         | `Automatisch`: die Zonen, die der Receiver meldet (bei älteren Modellen nur die Hauptzone). Oder erzwinge 1, 2 oder 3 Zonen.                                              |
 | **Lautstärkeskala des Receivers** | Der höchste Lautstärkewert, den der Receiver anzeigt: 80 bei den meisten Modellen, 200 bei neueren, die in 0,5er-Schritten zählen. „Verbindung testen“ zeigt den Wert an. |
 | **Maximale Lautstärke (%)**       | Gladys sendet **nie** eine höhere Lautstärke, egal was ein Schieberegler, eine Taste oder eine Szene verlangt. Standardmäßig 80 %.                                        |
-| **Detaillierte Protokolle**       | Protokolliert jede mit dem Receiver ausgetauschte Nachricht. Aktivieren Sie es, um ein Problem zu verstehen, und schalten Sie es danach wieder aus.                       |
+| **Detaillierte Protokolle**       | Protokolliert jede mit dem Receiver ausgetauschte Nachricht. Aktiviere es, um ein Problem zu verstehen, und schalte es danach wieder aus.                                 |
 
 Die Lautstärke ist ein **Prozentsatz der Skala**: 50 % bei einer Skala von 80
 zeigt am Receiver 40 an.
 
-## Was Sie erhalten
+## Was du erhältst
 
 ### Hauptzone
 
 - **Ein/Aus** (ein / Standby)
 - **Lautstärke** (Schieberegler, in %), **Lauter**, **Leiser**, **Stumm**
   (Umschalten)
-- **Eingang**: die Liste der Eingänge, mit den Namen, die Sie ihnen am Receiver
-  gegeben haben (neuere Modelle), oder den Standardnamen (BD/DVD, CD, NET…)
+- **Eingang**: die Liste der Eingänge, mit den Namen, die du ihnen am Receiver
+  gegeben hast (neuere Modelle), oder den Standardnamen (BD/DVD, CD, NET…)
 - **Wiedergabemodus**: Stereo, Direct, Dolby, DTS…
 - **Tuner-Senderspeicher** (1 bis 40)
 - **Play, Pause, Stop, Zurück, Weiter**: für den Netzwerk-, USB- oder
@@ -106,8 +106,8 @@ sonst die Hauptzone des ersten Receivers):
 - Tasten: Ein/Standby, leiser, lauter, stumm, wenn die Zone eingeschaltet ist;
   Einschalten und **Quelle abspielen**, wenn sie im Standby ist.
 
-**Quelle abspielen** öffnet ein kleines Formular: Wählen Sie einen Eingang der
-Zone (der aktuelle ist vorausgefüllt) und, wenn Sie möchten, eine Lautstärke in
+**Quelle abspielen** öffnet ein kleines Formular: Wähle einen Eingang der
+Zone (der aktuelle ist vorausgefüllt) und, wenn du möchtest, eine Lautstärke in
 %, begrenzt durch die Einstellung **Maximale Lautstärke**. Gladys schaltet die
 Zone ein, wartet auf sie, wählt dann den Eingang und stellt die Lautstärke ein,
 genau wie die Szenen-Aktion. Dieses Formular erfordert Gladys 5.2 oder neuer,
@@ -118,20 +118,20 @@ was die Integration inzwischen voraussetzt.
 - **Verbindung testen**: eine Zeile pro Zone (verbunden oder nicht, Betrieb,
   Eingang, Lautstärke) und die eingegebenen Adressen, die nicht geantwortet
   haben.
-- **ISCP-Befehl senden**: Probieren Sie einen Befehl aus, bevor Sie ihn in eine
-  Szene einbauen. Beispiele: `PWR01` (einschalten), `MVL20` (Lautstärke),
+- **ISCP-Befehl senden**: Probiere einen Befehl aus, bevor du ihn in eine
+  Szene einbaust. Beispiele: `PWR01` (einschalten), `MVL20` (Lautstärke),
   `SLI23` (Eingang CD), `LMDQSTN` (welcher Wiedergabemodus?).
 
 ## Fehlerbehebung
 
-| Problem                                        | Hinweis                                                                                                                        |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Der Receiver erscheint nicht unter „Entdecken“ | Netzwerk-Standby aktiviert? Im selben Netzwerk wie Gladys? Sonst geben Sie seine IP unter „Adressen der Receiver“ ein.         |
-| „Nicht erreichbar“, sobald er im Standby ist   | Aktivieren Sie Netzwerk-Standby (siehe oben).                                                                                  |
-| Die Lautstärke passt nicht zur Anzeige         | Stellen Sie die „Lautstärkeskala des Receivers“ ein (meist 80 oder 200).                                                       |
-| Ein Eingang fehlt in der Liste                 | Ältere Modelle melden ihre Eingänge nicht: Dann wird die Standardliste verwendet. Nutzen Sie „ISCP-Befehl senden“ mit `SLIxx`. |
-| Play/Pause bewirken nichts                     | Diese Tasten steuern den eigenen Netzwerk-/USB-/Bluetooth-Player des Receivers, keine HDMI-Quelle.                             |
+| Problem                                        | Hinweis                                                                                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Der Receiver erscheint nicht unter „Entdecken“ | Netzwerk-Standby aktiviert? Im selben Netzwerk wie Gladys? Sonst gib seine IP unter „Adressen der Receiver“ ein.          |
+| „Nicht erreichbar“, sobald er im Standby ist   | Aktiviere Netzwerk-Standby (siehe oben).                                                                                  |
+| Die Lautstärke passt nicht zur Anzeige         | Stelle die „Lautstärkeskala des Receivers“ ein (meist 80 oder 200).                                                       |
+| Ein Eingang fehlt in der Liste                 | Ältere Modelle melden ihre Eingänge nicht: Dann wird die Standardliste verwendet. Nutze „ISCP-Befehl senden“ mit `SLIxx`. |
+| Play/Pause bewirken nichts                     | Diese Tasten steuern den eigenen Netzwerk-/USB-/Bluetooth-Player des Receivers, keine HDMI-Quelle.                        |
 
-Für einen Fehlerbericht aktivieren Sie **Detaillierte Protokolle**, reproduzieren
-Sie das Problem und hängen Sie die Protokolle **ohne** IP- oder MAC-Adressen an:
+Für einen Fehlerbericht aktiviere **Detaillierte Protokolle**, reproduziere
+das Problem und hänge die Protokolle **ohne** IP- oder MAC-Adressen an:
 <https://github.com/prohand/gladys-onkyo/issues>

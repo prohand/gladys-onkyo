@@ -26,7 +26,7 @@ test('test_connection: one line per zone, and the addresses that answered nothin
 test('test_connection with nothing at all says how to start', async () => {
   const { hub } = setupHub({ created: [] });
   const message = await testConnection(hub);
-  assert.match(message.en, /Discovery tab/);
+  assert.match(message.en, /Discover tab/);
   assert.match(message.de, /„Entdecken“/);
   assert.match(message.es, /«Descubrir»/);
 });

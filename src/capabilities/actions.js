@@ -92,9 +92,9 @@ export async function testConnection(hub) {
 
   if (hub.list.length === 0 && silent.length === 0) {
     return {
-      en: 'No receiver yet. Open the Discovery tab to scan the network, or type the address of the receiver in the configuration.',
+      en: 'No receiver yet. Open the Discover tab to scan the network, or type the address of the receiver in the configuration.',
       fr: "Aucun ampli pour l'instant. Ouvrez l'onglet Découverte pour scanner le réseau, ou saisissez l'adresse de l'ampli dans la configuration.",
-      de: 'Noch kein Receiver. Öffnen Sie den Tab „Entdecken“, um das Netzwerk zu durchsuchen, oder geben Sie die Adresse des Receivers in der Konfiguration ein.',
+      de: 'Noch kein Receiver. Öffne den Tab „Entdecken“, um das Netzwerk zu durchsuchen, oder gib die Adresse des Receivers in der Konfiguration ein.',
       es: 'Todavía no hay ningún receptor. Abra la pestaña «Descubrir» para buscar en la red, o escriba la dirección del receptor en la configuración.',
     };
   }

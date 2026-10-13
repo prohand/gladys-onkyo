@@ -31,9 +31,9 @@
         "es": "Primeros pasos"
       },
       "description": {
-        "en": "The receivers are found on your network: open the Discovery tab and add them. Everything stays local (eISCP protocol, port 60128), no account, no cloud. On the receiver, turn on Network Standby (Setup > Hardware > Power Management), or Gladys loses it as soon as it goes to standby.",
+        "en": "The receivers are found on your network: open the Discover tab and add them. Everything stays local (eISCP protocol, port 60128), no account, no cloud. On the receiver, turn on Network Standby (Setup > Hardware > Power Management), or Gladys loses it as soon as it goes to standby.",
         "fr": "Les amplis sont trouvés sur votre réseau : ouvrez l'onglet Découverte et ajoutez-les. Tout reste en local (protocole eISCP, port 60128), sans compte ni cloud. Sur l'ampli, activez la Veille réseau (Setup > Hardware > Power Management), sinon Gladys le perd dès sa mise en veille.",
-        "de": "Die Receiver werden in Ihrem Netzwerk gefunden: Öffnen Sie den Tab „Entdecken“ und fügen Sie sie hinzu. Alles bleibt lokal (eISCP-Protokoll, Port 60128), ohne Konto und ohne Cloud. Aktivieren Sie am Receiver Netzwerk-Standby (Setup > Hardware > Power Management), sonst verliert Gladys ihn, sobald er in den Standby wechselt.",
+        "de": "Die Receiver werden in deinem Netzwerk gefunden: Öffne den Tab „Entdecken“ und füge sie hinzu. Alles bleibt lokal (eISCP-Protokoll, Port 60128), ohne Konto und ohne Cloud. Aktiviere am Receiver Netzwerk-Standby (Setup > Hardware > Power Management), sonst verliert Gladys ihn, sobald er in den Standby wechselt.",
         "es": "Los receptores se encuentran en su red: abra la pestaña «Descubrir» y añádalos. Todo se queda en local (protocolo eISCP, puerto 60128), sin cuenta ni nube. En el receptor, active la espera de red (Setup > Hardware > Power Management); si no, Gladys lo pierde en cuanto pasa a modo de espera."
       },
       "links": [
@@ -58,9 +58,9 @@
         "es": "Direcciones de los receptores"
       },
       "description": {
-        "en": "Only for a receiver the Discovery tab does not find (another subnet, a VLAN): its IP address, several separated by commas. A fixed IP in your router is recommended.",
+        "en": "Only for a receiver the Discover tab does not find (another subnet, a VLAN): its IP address, several separated by commas. A fixed IP in your router is recommended.",
         "fr": "Uniquement pour un ampli que l'onglet Découverte ne trouve pas (autre sous-réseau, VLAN) : son adresse IP, plusieurs séparées par des virgules. Une IP fixe dans votre box est conseillée.",
-        "de": "Nur für einen Receiver, den der Tab „Entdecken“ nicht findet (anderes Subnetz, VLAN): seine IP-Adresse, mehrere durch Kommas getrennt. Eine feste IP in Ihrem Router wird empfohlen.",
+        "de": "Nur für einen Receiver, den der Tab „Entdecken“ nicht findet (anderes Subnetz, VLAN): seine IP-Adresse, mehrere durch Kommas getrennt. Eine feste IP in deinem Router wird empfohlen.",
         "es": "Solo para un receptor que la pestaña «Descubrir» no encuentra (otra subred, una VLAN): su dirección IP, varias separadas por comas. Se recomienda una IP fija en su router."
       },
       "placeholder": {
@@ -196,7 +196,7 @@
       "description": {
         "en": "Gladys never sends a volume above this, whatever a scene or a slider asks: protects your speakers and your ears.",
         "fr": "Gladys n'envoie jamais un volume au-dessus, quoi que demande une scène ou un curseur : protège vos enceintes et vos oreilles.",
-        "de": "Gladys sendet nie eine höhere Lautstärke, egal was eine Szene oder ein Schieberegler verlangt: Das schützt Ihre Lautsprecher und Ihre Ohren.",
+        "de": "Gladys sendet nie eine höhere Lautstärke, egal was eine Szene oder ein Schieberegler verlangt: Das schützt deine Lautsprecher und deine Ohren.",
         "es": "Gladys nunca envía un volumen superior, pida lo que pida una escena o un control deslizante: protege sus altavoces y sus oídos."
       },
       "required": false,
@@ -216,7 +216,7 @@
       "description": {
         "en": "Log every message exchanged with the receivers. Turn it on to understand a problem, then off again: it is verbose.",
         "fr": "Journalise chaque message échangé avec les amplis. Activez-le pour comprendre un problème, puis désactivez-le : c'est verbeux.",
-        "de": "Protokolliert jede mit den Receivern ausgetauschte Nachricht. Aktivieren Sie es, um ein Problem zu verstehen, und schalten Sie es danach wieder aus: Es ist sehr ausführlich.",
+        "de": "Protokolliert jede mit den Receivern ausgetauschte Nachricht. Aktiviere es, um ein Problem zu verstehen, und schalte es danach wieder aus: Es ist sehr ausführlich.",
         "es": "Registra cada mensaje intercambiado con los receptores. Actívelo para entender un problema y desactívelo después: genera mucho texto."
       },
       "required": false,

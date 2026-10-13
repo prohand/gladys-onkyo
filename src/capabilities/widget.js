@@ -61,9 +61,9 @@ export function buildWidgetContent(hub, { settings = {} } = {}) {
           type: 'text',
           variant: 'body',
           text: {
-            en: 'No Onkyo receiver yet. Add one from the Discovery tab of the integration.',
+            en: 'No Onkyo receiver yet. Add one from the Discover tab of the integration.',
             fr: "Aucun ampli Onkyo pour l'instant. Ajoutez-en un depuis l'onglet Découverte de l'intégration.",
-            de: 'Noch kein Onkyo-Receiver. Fügen Sie einen über den Tab „Entdecken“ der Integration hinzu.',
+            de: 'Noch kein Onkyo-Receiver. Füge einen über den Tab „Entdecken“ der Integration hinzu.',
             es: 'Todavía no hay ningún receptor Onkyo. Añada uno desde la pestaña «Descubrir» de la integración.',
           },
         },
@@ -253,7 +253,7 @@ async function playSource(hub, params, values, options) {
     return {
       en: 'Choose the input in the form of the button (Gladys 5.2 or later).',
       fr: "Choisissez l'entrée dans le formulaire du bouton (Gladys 5.2 ou plus récent).",
-      de: 'Wählen Sie den Eingang im Formular der Schaltfläche (Gladys 5.2 oder neuer).',
+      de: 'Wähle den Eingang im Formular der Schaltfläche (Gladys 5.2 oder neuer).',
       es: 'Elija la entrada en el formulario del botón (Gladys 5.2 o posterior).',
     };
   }
