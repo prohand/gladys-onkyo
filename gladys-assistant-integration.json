@@ -8,8 +8,8 @@
     "de": "Onkyo-, Integra- und Pioneer-AV-Receiver im Netzwerk steuern: Ein/Aus, Lautstärke, Eingänge, Zonen.",
     "es": "Controle sus receptores AV Onkyo, Integra y Pioneer en red: encendido, volumen, entradas, zonas."
   },
-  "version": "1.2.0",
-  "docker_image": "ghcr.io/prohand/gladys-onkyo:1.2.0",
+  "version": "1.2.1",
+  "docker_image": "ghcr.io/prohand/gladys-onkyo:1.2.1",
   "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/prohand/gladys-onkyo/main/cover.png",
   "categories": ["multimedia"],
