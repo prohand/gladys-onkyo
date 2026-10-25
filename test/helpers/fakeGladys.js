@@ -4,7 +4,25 @@
 // publishChangedStates / forgetPublishedStates follow the SDK: an entry equal
 // (same `state`, same `text`) to the last ACCEPTED value of its feature is
 // skipped, a refused batch is forgotten and its error thrown.
+// publishNowPlaying records every call (`nowPlaying`) and publishes the
+// changed values like the SDK, the position only when it was never sent or
+// the playback state / title changed with it (the SDK also re-sends a jump of
+// more than 3 s; the tests here never let time run).
 // -----------------------------------------------------------------------------
+
+import { artworkKey } from '@gladysassistant/integration-sdk';
+
+// publishNowPlaying keys → music feature types.
+const NOW_PLAYING_TYPES = {
+  playback_state: 'playback_state',
+  title: 'title',
+  artist: 'artist',
+  album: 'album',
+  artwork_url: 'artwork',
+  duration: 'duration',
+  position: 'position',
+};
+const MUSIC_TEXTS = ['title', 'artist', 'album', 'artwork'];
 
 export function createFakeGladys({ devices = [], scanReplies = [] } = {}) {
   const published = [];
@@ -14,6 +32,7 @@ export function createFakeGladys({ devices = [], scanReplies = [] } = {}) {
   const discovered = [];
   const widgetRefreshes = [];
   const scans = [];
+  const nowPlaying = [];
   // Last value accepted per feature, as publishChangedStates remembers it.
   const remembered = new Map();
 
@@ -27,6 +46,7 @@ export function createFakeGladys({ devices = [], scanReplies = [] } = {}) {
     discovered,
     widgetRefreshes,
     scans,
+    nowPlaying,
     // Set to an Error to make the next state publications fail.
     refuseStates: null,
 
@@ -68,6 +88,34 @@ export function createFakeGladys({ devices = [], scanReplies = [] } = {}) {
           remembered.delete(id);
         }
       }
+    },
+
+    artworkKey(url) {
+      return artworkKey(url);
+    },
+
+    async publishNowPlaying(deviceExternalId, values) {
+      nowPlaying.push({ device: deviceExternalId, values });
+      const states = [];
+      const resetsPosition = 'playback_state' in values || 'title' in values;
+      for (const [key, value] of Object.entries(values)) {
+        const type = NOW_PLAYING_TYPES[key];
+        if (!type) {
+          throw new Error(`publishNowPlaying: unknown key "${key}"`);
+        }
+        const id = `${deviceExternalId}:${type}`;
+        if (type === 'position' && remembered.has(id) && !resetsPosition) {
+          continue;
+        }
+        if (type === 'artwork') {
+          states.push({ device_feature_external_id: id, text: value ? artworkKey(value) : '' });
+        } else if (MUSIC_TEXTS.includes(type)) {
+          states.push({ device_feature_external_id: id, text: value });
+        } else {
+          states.push({ device_feature_external_id: id, state: value });
+        }
+      }
+      return gladys.publishChangedStates(states);
     },
 
     async publishTransports(entries) {

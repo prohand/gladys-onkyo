@@ -9,7 +9,8 @@ dependency: `@gladysassistant/integration-sdk`) for **Onkyo network AV receivers
 Integra / Pioneer models speaking the same eISCP protocol). Local only: TCP and UDP port 60128,
 no account, no cloud. Gladys 5.1+ adds scene triggers (input changed, new track, receiver
 online/offline), scene actions (play an input, mute, listening mode, raw command) and a
-"receiver" widget.
+"receiver" widget; Gladys 5.3+ (the manifest floor, `>=5.3.0`) makes the main zone a music
+player (`music` features, `publishNowPlaying`, covers, manifest `"music": {}`).
 
 ## Commands
 
@@ -43,7 +44,9 @@ src/onkyo/connection.js    kept-open TCP link: write queue, queries, keep-alive,
 src/onkyo/receiver.js      one receiver: reported state, track settle, orders
 src/onkyo/discovery.js     LAN scan through the core, typed hosts (UDP then TCP/NRI)
 src/onkyo/nri.js           the receiver's XML self-description (zones, named inputs)
-src/onkyo/codes.js         zones, inputs, listening modes, volume scale conversion
+src/onkyo/codes.js         zones, inputs, listening modes, volume scale, NST / NTM parsing
+src/onkyo/jacketArt.js     NJA jacket art packets -> one image (or a link, or none)
+src/artwork.js             covers kept in memory by key, served to onMusicGetArtwork
 src/capabilities/          Gladys 5.1 scene actions, widget, Configuration buttons
 ```
 
@@ -72,19 +75,31 @@ src/capabilities/          Gladys 5.1 scene actions, widget, Configuration butto
 - **Receivers drop orders sent too close together**: writes are queued with a small gap.
 - **Every feature declares `min`/`max`** (NOT NULL in Gladys), text features included (0/0).
 - The NRI answer is a large XML document: never log it whole.
+- **Music player** (main zone only: the receiver has ONE network player, NTC / NST / NTI...):
+  `gladys.publishNowPlaying` is called on the receiver's messages only (NST status, NTI / NAT /
+  NAL, NTM time pushed every second — the SDK sends the position only on a jump, NJA cover),
+  never on a timer nor from an order; `playback_state` is written as NTC PLAY / PAUSE / STOP and
+  shows the NST that follows (`has_feedback`). Music feature keys are the music types (the SDK's
+  default ids); their texts may be `''` (the contract's "nothing loaded"). Covers are image
+  bytes kept under a content key and served by `onMusicGetArtwork`: BMP or > 300 KB is "no
+  cover", a link is only read on the receiver's own host. No browse / search / queue: eISCP
+  exposes the receiver's menus as screens, not as data.
 
 ### Manifest
 
 `test/manifest.test.js` ties `gladys-assistant-integration.json` to the code: config defaults =
 `DEFAULT_CONFIG`, action/scene/widget handlers registered, trigger keys = `SCENE_TRIGGERS`, input
-and listening-mode option lists = `codes.js`, version = `package.json` = `docker_image` tag.
+and listening-mode option lists = `codes.js`, version = `package.json` = `docker_image` tag,
+`gladys_version >=5.3.0` with `keywords` (1–10, 2–30 characters) and `"music": {}`, categories
+in the store vocabulary, no `countries` (sold worldwide).
 Texts are `{ en, fr, de, es }` objects (labels, descriptions, placeholders, options). The catalog
 `description` is 10–100 characters per language.
 
 ## Testing
 
 No hardware, no network: `test/helpers/fakeReceiver.js` is a pretend receiver behind a pretend
-TCP socket (answers queries and orders, `push()` simulates the remote, `drop()` the cable),
+TCP socket (answers queries and orders — NTC play/pause/stop with the NST that follows, NJAREQ
+with its `jacketArt` lines —, `push()` simulates the remote, `drop()` the cable),
 `test/helpers/hubSetup.js` wires a hub to it and to `test/helpers/fakeGladys.js`.
 
 ## Conventions

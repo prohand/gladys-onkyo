@@ -49,6 +49,18 @@ gladys.onDeviceCreated(async () => {
   await hub.sync();
 });
 
+// --- A device was updated from the Discovery tab (e.g. to add the music player
+// features of a receiver created by an older version): Gladys holds no value for
+// the new features yet, publish them all again.
+gladys.onDeviceUpdated(async () => {
+  await hub.sync();
+});
+
+// --- Music player (Gladys 5.3+): the covers the receivers sent ----------------
+// They are kept in memory under a key (see src/artwork.js): the core asks for
+// the bytes of a key it saw published, the browser never reaches the LAN.
+gladys.onMusicGetArtwork(async (key) => hub.artworkBytes(key));
+
 // --- Configuration screen buttons ----------------------------------------------
 gladys.onAction('test_connection', () => testConnection(hub));
 gladys.onAction('send_command', (fields) => sendCommand(hub, fields));

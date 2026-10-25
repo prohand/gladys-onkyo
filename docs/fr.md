@@ -7,6 +7,8 @@ protocole (eISCP).
 Tout reste **en local** : Gladys parle directement à l'ampli sur votre réseau
 (port 60128). Pas de compte, pas de cloud, pas d'Internet.
 
+Elle demande **Gladys 5.3.0** ou plus récent.
+
 ## Avant de commencer
 
 1. L'ampli doit être **branché au réseau** (câble ou Wi-Fi).
@@ -58,6 +60,29 @@ de 80, l'ampli affiche 40.
   Bluetooth de l'ampli
 - **En cours de lecture** : artiste et titre
 
+### Lecteur de musique (Gladys 5.3+)
+
+La zone principale est aussi un **lecteur de musique** dans Gladys : la boîte
+musique du tableau de bord montre ce que joue le lecteur réseau, USB ou
+Bluetooth de l'ampli, tel que l'ampli le rapporte.
+
+- **Lecture** : en lecture, en pause ou arrêté. C'est aussi une commande :
+  lecture, pause et stop sont envoyés à l'ampli, et l'état affiché est celui
+  qu'il confirme.
+- **Titre**, **Artiste**, **Album**
+- **Durée** et **Position** (un flux radio n'a pas de durée)
+- **Pochette** : l'image que l'ampli envoie à chaque morceau (une image JPEG ou
+  PNG, ou un lien vers son propre serveur web). Les anciens modèles envoient une
+  image BMP, que Gladys ne sait pas afficher : pas de pochette dans ce cas.
+
+L'ampli n'offre ni catalogue, ni recherche, ni file d'attente par le réseau :
+choisissez votre musique dans l'appli Onkyo ou sur l'ampli, Gladys suit ce
+qu'il joue.
+
+Votre ampli a été créé avec une version plus ancienne de l'intégration ? Ouvrez
+l'onglet **Découverte** et cliquez sur **Mettre à jour** pour ajouter ces
+fonctionnalités.
+
 ### Zone 2 et zone 3
 
 Marche, volume, muet, volume +/−, entrée. L'entrée « Source de la zone
@@ -107,8 +132,7 @@ zone principale du premier ampli) :
 zone (celle en cours est pré-remplie) et, si vous voulez, un volume en %,
 plafonné par le réglage **Volume maximal**. Gladys allume la zone, l'attend,
 puis choisit l'entrée et règle le volume, exactement comme l'action de scène. Ce
-formulaire demande Gladys 5.2 ou plus récent, désormais requis par
-l'intégration.
+formulaire demande Gladys 5.2 ou plus récent (l'intégration demande 5.3).
 
 ## Boutons de la configuration
 
@@ -120,13 +144,14 @@ l'intégration.
 
 ## En cas de souci
 
-| Problème                                      | Piste                                                                                                                                    |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| L'ampli n'apparaît pas dans Découverte        | Veille réseau activée ? Même réseau que Gladys ? Sinon saisissez son IP dans « Adresses des amplis ».                                    |
-| « Injoignable » dès que l'ampli est en veille | Activez la veille réseau (voir plus haut).                                                                                               |
-| Le volume ne correspond pas à l'affichage     | Réglez « Échelle de volume de l'ampli » (80 ou 200 le plus souvent).                                                                     |
-| Une entrée manque dans la liste               | Les anciens modèles n'annoncent pas leurs entrées : la liste standard est utilisée. Utilisez « Envoyer une commande ISCP » avec `SLIxx`. |
-| Lecture/Pause sans effet                      | Ces touches pilotent le lecteur réseau/USB/Bluetooth de l'ampli, pas une source HDMI.                                                    |
+| Problème                                      | Piste                                                                                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| L'ampli n'apparaît pas dans Découverte        | Veille réseau activée ? Même réseau que Gladys ? Sinon saisissez son IP dans « Adresses des amplis ».                                          |
+| « Injoignable » dès que l'ampli est en veille | Activez la veille réseau (voir plus haut).                                                                                                     |
+| Le volume ne correspond pas à l'affichage     | Réglez « Échelle de volume de l'ampli » (80 ou 200 le plus souvent).                                                                           |
+| Une entrée manque dans la liste               | Les anciens modèles n'annoncent pas leurs entrées : la liste standard est utilisée. Utilisez « Envoyer une commande ISCP » avec `SLIxx`.       |
+| Lecture/Pause sans effet                      | Ces touches pilotent le lecteur réseau/USB/Bluetooth de l'ampli, pas une source HDMI.                                                          |
+| Pas de pochette dans la boîte musique         | Les anciens modèles envoient leurs pochettes en BMP, que Gladys ne sait pas afficher. La pochette n'existe que pour les sources réseau et USB. |
 
 Pour un rapport de bug, activez **Journaux détaillés**, reproduisez le problème
 et joignez les logs **sans** adresses IP ni MAC :

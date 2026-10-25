@@ -4,7 +4,9 @@
 // Zone 2 and zone 3 are separate rooms with their own power, volume and input:
 // one device each lets the user put them in the right room and drive them on
 // their own. The main zone carries what only it has: listening mode, tuner
-// preset, network player keys and "now playing".
+// preset, network player keys and "now playing" — and the music player
+// features (Gladys 5.3: `music` category), since the receiver has ONE network
+// player, driven and reported through the main zone (NTC / NST / NTI...).
 //
 // External ids are built on the receiver's MAC address (what it answers to the
 // discovery query): an IP changes with DHCP, a MAC does not. Feature keys are
@@ -36,7 +38,19 @@ export const FEATURES = {
   PREVIOUS: 'previous',
   PRESET: 'preset',
   NOW_PLAYING: 'now-playing',
+  // Music player features (Gladys 5.3). Their keys are the `music` feature
+  // types themselves: the ids publishNowPlaying builds by default.
+  PLAYBACK_STATE: 'playback_state',
+  TITLE: 'title',
+  ARTIST: 'artist',
+  ALBUM: 'album',
+  ARTWORK: 'artwork',
+  DURATION: 'duration',
+  POSITION: 'position',
 };
+
+// The longest time a track or a position can show (a day): a display range only.
+const MAX_SECONDS = 86400;
 
 const ZONE_NAMES = { main: '', zone2: 'Zone 2', zone3: 'Zone 3' };
 
@@ -100,6 +114,52 @@ function pushButton(ids, key, name, type) {
     has_feedback: false,
     keep_history: false,
   };
+}
+
+/**
+ * The music player of the main zone. The receiver is the source of truth:
+ * `playback_state` is writable (0 pause, 1 play, 2 stop) and shows what the
+ * receiver REPORTS afterwards (has_feedback). No seek on this protocol: the
+ * position is read-only. The core keeps no history of the music category.
+ */
+function musicFeatures(ids) {
+  const read = (key, name, type, extra = {}) => ({
+    name,
+    external_id: ids.feature(key),
+    category: CATEGORIES.MUSIC,
+    type,
+    min: 0,
+    max: 0,
+    read_only: true,
+    has_feedback: false,
+    keep_history: false,
+    ...extra,
+  });
+  return [
+    {
+      name: 'Playback',
+      external_id: ids.feature(FEATURES.PLAYBACK_STATE),
+      category: CATEGORIES.MUSIC,
+      type: TYPES.MUSIC.PLAYBACK_STATE,
+      min: 0,
+      max: 3,
+      read_only: false,
+      has_feedback: true,
+      keep_history: false,
+    },
+    read(FEATURES.TITLE, 'Title', TYPES.MUSIC.TITLE),
+    read(FEATURES.ARTIST, 'Artist', TYPES.MUSIC.ARTIST),
+    read(FEATURES.ALBUM, 'Album', TYPES.MUSIC.ALBUM),
+    read(FEATURES.ARTWORK, 'Cover', TYPES.MUSIC.ARTWORK),
+    read(FEATURES.DURATION, 'Duration', TYPES.MUSIC.DURATION, {
+      unit: UNITS.SECONDS,
+      max: MAX_SECONDS,
+    }),
+    read(FEATURES.POSITION, 'Position', TYPES.MUSIC.POSITION, {
+      unit: UNITS.SECONDS,
+      max: MAX_SECONDS,
+    }),
+  ];
 }
 
 /** Brand + model, the default name of the device. */
@@ -200,6 +260,7 @@ export function buildZoneDevice(gladys, receiver, zone) {
         has_feedback: false,
         keep_history: false,
       },
+      ...musicFeatures(ids),
     );
   }
 

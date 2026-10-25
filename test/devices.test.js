@@ -77,8 +77,37 @@ test('the main zone carries the player, the other zones do not', () => {
     FEATURES.NEXT,
     FEATURES.PRESET,
     FEATURES.NOW_PLAYING,
+    FEATURES.PLAYBACK_STATE,
+    FEATURES.TITLE,
+    FEATURES.ARTIST,
+    FEATURES.ALBUM,
+    FEATURES.ARTWORK,
+    FEATURES.DURATION,
+    FEATURES.POSITION,
   ]);
   assert.deepEqual(keys('zone2'), keys('main').slice(0, 6));
+});
+
+test('the music player features: the keys publishNowPlaying uses, playback writable', () => {
+  const gladys = createFakeGladys();
+  const music = buildZoneDevice(gladys, plain, 'main').features.filter(
+    (f) => f.category === 'music',
+  );
+  // The default ids of publishNowPlaying are `<device>:<music type>`.
+  for (const feature of music) {
+    assert.equal(feature.external_id, `ext:onkyo:receiver:aabbccddeeff:${feature.type}`);
+    assert.equal(feature.keep_history, false, feature.type);
+  }
+  assert.deepEqual(
+    music.map((f) => f.type),
+    ['playback_state', 'title', 'artist', 'album', 'artwork', 'duration', 'position'],
+  );
+  const writable = music.filter((f) => !f.read_only);
+  assert.deepEqual(
+    writable.map((f) => [f.type, f.has_feedback, f.min, f.max]),
+    [['playback_state', true, 0, 3]],
+  );
+  assert.equal(music.find((f) => f.type === 'position').unit, 'seconds');
 });
 
 test('input options use the names the receiver gave, per zone', () => {
