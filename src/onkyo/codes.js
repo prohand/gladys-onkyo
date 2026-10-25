@@ -8,6 +8,8 @@
 // inputs replace them.
 // -----------------------------------------------------------------------------
 
+import { MUSIC_PLAYBACK_STATE } from '@gladysassistant/integration-sdk';
+
 /** The zones, and the command that drives each of their controls. */
 export const ZONES = {
   main: { power: 'PWR', volume: 'MVL', mute: 'AMT', source: 'SLI' },
@@ -25,6 +27,10 @@ export const MAIN_ONLY = {
   title: 'NTI',
   artist: 'NAT',
   album: 'NAL',
+  // Network player: play status, elapsed / total time, jacket art.
+  netStatus: 'NST',
+  netTime: 'NTM',
+  jacketArt: 'NJA',
 };
 
 /**
@@ -99,6 +105,61 @@ export const NET_KEYS = {
   next: 'TRUP',
   previous: 'TRDN',
 };
+
+/**
+ * Play status of the network player: the first character of NST (`P--`,
+ * `p--`, `S--`...; the two others are repeat and shuffle, newer models add
+ * more). Fast forward / rewind are still playing; the end of a file is idle.
+ */
+const NET_PLAY_STATUS = {
+  P: MUSIC_PLAYBACK_STATE.PLAYING,
+  F: MUSIC_PLAYBACK_STATE.PLAYING,
+  R: MUSIC_PLAYBACK_STATE.PLAYING,
+  p: MUSIC_PLAYBACK_STATE.PAUSED,
+  S: MUSIC_PLAYBACK_STATE.IDLE,
+  E: MUSIC_PLAYBACK_STATE.IDLE,
+};
+
+/**
+ * NST → the Gladys playback state (MUSIC_PLAYBACK_STATE), or null when the
+ * receiver says nothing usable (`N/A`, an unknown letter).
+ */
+export function parseNetStatus(value) {
+  return NET_PLAY_STATUS[value?.[0]] ?? null;
+}
+
+/** The NTC key that asks the network player for a Gladys playback state. */
+export const PLAYBACK_KEYS = {
+  [MUSIC_PLAYBACK_STATE.PAUSED]: 'pause',
+  [MUSIC_PLAYBACK_STATE.PLAYING]: 'play',
+  [MUSIC_PLAYBACK_STATE.IDLE]: 'stop',
+};
+
+// `mm:ss`, or `hh:mm:ss` on newer models; `--:--` when the receiver does not know.
+function parseClock(text) {
+  const parts = String(text ?? '')
+    .trim()
+    .split(':');
+  if (parts.length < 2 || parts.length > 3 || !parts.every((part) => /^\d{1,3}$/.test(part))) {
+    return null;
+  }
+  return parts.reduce((total, part) => total * 60 + Number(part), 0);
+}
+
+/**
+ * NTM (`01:23/04:56`) → seconds. `position` is null when the receiver does not
+ * know it; `duration` is 0 when it does not know it either (a radio stream):
+ * 0 is the "unknown or live" duration of the music contract.
+ * @returns {{ position: number | null, duration: number } | null}
+ */
+export function parseNetTime(value) {
+  const text = String(value ?? '').trim();
+  if (!/^[\d:-]+\/[\d:-]+$/.test(text)) {
+    return null;
+  }
+  const [elapsed, total] = text.split('/');
+  return { position: parseClock(elapsed), duration: parseClock(total) ?? 0 };
+}
 
 /** Volume scales a receiver may use: how many steps from silence to the top. */
 export const VOLUME_RESOLUTIONS = [50, 80, 100, 200];

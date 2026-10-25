@@ -23,6 +23,7 @@ import {
   zonesFor,
 } from './devices.js';
 import { normalizeConfig } from './config.js';
+import { ArtworkStore, fetchReceiverArtwork } from './artwork.js';
 
 const logger = createLogger({ name: 'hub' });
 
@@ -54,6 +55,12 @@ export class ReceiverHub {
     this.reportTimer = null;
     this.publishTimer = null;
     this.onWidgetChange = () => {};
+    // The covers the receivers sent, and the last one of each receiver
+    // (`artwork_url`, null for "no cover", absent while unknown).
+    this.artworks = new ArtworkStore();
+    this.currentArtwork = new Map();
+    this.artworkRequests = new Map();
+    this.fetchArtwork = options.fetchArtwork ?? fetchReceiverArtwork;
     this.createReceiver = options.createReceiver ?? ((info) => new Receiver(info));
     this.probe = options.probe ?? probeHost;
     this.scan = options.scan ?? scanLan;
@@ -118,8 +125,31 @@ export class ReceiverHub {
         this.publish(receiver, 'main', FEATURES.NOW_PLAYING, {
           text: receiver.nowPlaying || NO_TRACK,
         });
+        this.publishPlayer(receiver, this.nowPlayingOf(receiver));
       }
     }
+  }
+
+  /**
+   * Everything the receiver last said about its network player, in the
+   * publishNowPlaying shape. What it never said stays out (absent = unknown).
+   */
+  nowPlayingOf(receiver) {
+    const { title, artist, album, playback, position, duration } = receiver.main;
+    const nowPlaying = { title, artist, album };
+    if (playback !== null) {
+      nowPlaying.playback_state = playback;
+    }
+    if (duration !== null) {
+      nowPlaying.duration = duration;
+    }
+    if (position !== null) {
+      nowPlaying.position = position;
+    }
+    if (this.currentArtwork.has(receiver.id)) {
+      nowPlaying.artwork_url = this.currentArtwork.get(receiver.id);
+    }
+    return nowPlaying;
   }
 
   /** The Discovery tab: scan the LAN through the core, plus the typed hosts. */
@@ -170,6 +200,10 @@ export class ReceiverHub {
     this.receivers.set(id, receiver);
     receiver.on('change', (change) => this.handleChange(receiver, change));
     receiver.on('track', (track) => this.handleTrack(receiver, track));
+    receiver.on('time', ({ position, duration }) =>
+      this.publishPlayer(receiver, position === null ? { duration } : { duration, position }),
+    );
+    receiver.on('artwork', (artwork) => this.handleArtwork(receiver, artwork));
     receiver.on('online', () => this.handleOnline(receiver, true));
     receiver.on('offline', () => this.handleOnline(receiver, false));
     receiver.on('description', () => this.schedulePublishDevices());
@@ -232,6 +266,57 @@ export class ReceiverHub {
     }
   }
 
+  /**
+   * Publish what the network player of a receiver plays (music features of
+   * its main zone). Only ever called with what the receiver reported; the SDK
+   * sends the values that changed, and the position only on a jump (the
+   * dashboard moves it on its own while the track plays).
+   */
+  async publishPlayer(receiver, nowPlaying) {
+    if (!zonesFor(receiver, this.config).includes('main')) {
+      return;
+    }
+    const { device } = zoneIds(this.gladys, receiver.id, 'main');
+    if (!this.isCreated(device)) {
+      return;
+    }
+    try {
+      await this.gladys.publishNowPlaying(device, nowPlaying);
+    } catch (err) {
+      logger.warn(`Now playing of ${device} not published: ${err.message}`);
+    }
+  }
+
+  /**
+   * A cover the receiver sent (image bytes, a link to its own web server, or
+   * "none"): kept for onMusicGetArtwork, then published as the `artwork`.
+   */
+  async handleArtwork(receiver, artwork) {
+    // A link is read asynchronously: only the latest cover may win.
+    const request = (this.artworkRequests.get(receiver.id) ?? 0) + 1;
+    this.artworkRequests.set(receiver.id, request);
+    let data = artwork?.data ?? null;
+    if (artwork?.url) {
+      try {
+        data = await this.fetchArtwork(artwork.url, receiver.host);
+      } catch (err) {
+        logger.debug(`${receiver.label}: cover not read (${err.message})`);
+        data = null;
+      }
+    }
+    if (this.artworkRequests.get(receiver.id) !== request) {
+      return;
+    }
+    const url = data ? this.artworks.add(data) : null;
+    this.currentArtwork.set(receiver.id, url);
+    await this.publishPlayer(receiver, { artwork_url: url });
+  }
+
+  /** The base64 of a cover, for onMusicGetArtwork. */
+  artworkBytes(key) {
+    return this.artworks.get(key);
+  }
+
   handleChange(receiver, { zone, key, value, previous }) {
     this.onWidgetChange();
     switch (key) {
@@ -263,7 +348,19 @@ export class ReceiverHub {
         this.publish(receiver, 'main', FEATURES.NOW_PLAYING, {
           text: receiver.nowPlaying || NO_TRACK,
         });
+        this.publishPlayer(receiver, { [key]: value });
         break;
+      case 'album':
+        this.publishPlayer(receiver, { album: value });
+        break;
+      case 'playback': {
+        const { position } = receiver.main;
+        this.publishPlayer(
+          receiver,
+          position === null ? { playback_state: value } : { playback_state: value, position },
+        );
+        break;
+      }
       default:
         break;
     }
@@ -417,6 +514,10 @@ export class ReceiverHub {
         return receiver.setListeningMode(String(value));
       case FEATURES.PRESET:
         return receiver.setPreset(value);
+      case FEATURES.PLAYBACK_STATE:
+        // Nothing is published here: the new state is the one the receiver
+        // reports (NST), as for every other control.
+        return receiver.setPlayback(value);
       case FEATURES.PLAY:
       case FEATURES.PAUSE:
       case FEATURES.STOP:

@@ -6,18 +6,41 @@
 // written to it, and answers the way a receiver does — a query with the state,
 // an order with the new state. Tests read `commands` (everything Gladys sent)
 // and call `push()` to make the receiver report a change on its own.
+//
+// Its network player answers NTC play / pause / stop with the NST status a
+// receiver reports, and NJAREQ with the jacket art lines it was given.
 // -----------------------------------------------------------------------------
 
 import { EventEmitter } from 'node:events';
 import { buildPacket, createParser } from '../../src/onkyo/eiscp.js';
 
-const STATE_COMMANDS = ['PWR', 'MVL', 'AMT', 'SLI', 'ZPW', 'ZVL', 'ZMT', 'SLZ', 'LMD', 'PRS'];
+const STATE_COMMANDS = [
+  'PWR',
+  'MVL',
+  'AMT',
+  'SLI',
+  'ZPW',
+  'ZVL',
+  'ZMT',
+  'SLZ',
+  'LMD',
+  'PRS',
+  'NST',
+  'NTM',
+  'NTI',
+  'NAT',
+  'NAL',
+];
+
+// NTC key → the play status the network player then reports (NST).
+const PLAYER_KEYS = { PLAY: 'P--', PAUSE: 'p--', STOP: 'S--' };
 
 export function createFakeReceiver({
   state = {},
   refuse = false,
   silent = false,
   nri = null,
+  jacketArt = [],
 } = {}) {
   const receiver = {
     state: { PWR: '01', MVL: '28', AMT: '00', SLI: '2B', LMD: '00', ZPW: '00', ...state },
@@ -26,6 +49,7 @@ export function createFakeReceiver({
     refuse,
     silent,
     nri,
+    jacketArt,
     connections: 0,
   };
 
@@ -42,6 +66,19 @@ export function createFakeReceiver({
     if (command === 'NRI') {
       if (receiver.nri) {
         answer(socket, `NRI${receiver.nri}`);
+      }
+      return;
+    }
+    if (command === 'NTC') {
+      if (PLAYER_KEYS[value]) {
+        receiver.state.NST = PLAYER_KEYS[value];
+        answer(socket, `NST${receiver.state.NST}`);
+      }
+      return;
+    }
+    if (command === 'NJA') {
+      if (value === 'REQ') {
+        receiver.jacketArt.forEach((line) => answer(socket, `NJA${line}`));
       }
       return;
     }

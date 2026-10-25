@@ -7,6 +7,8 @@ protocolo (eISCP).
 Todo se queda en **local**: Gladys habla directamente con el receptor en su red
 (puerto 60128). Sin cuenta, sin nube, sin Internet.
 
+Requiere **Gladys 5.3.0** o posterior.
+
 ## Antes de empezar
 
 1. El receptor debe estar **en la red** (cable o Wi-Fi).
@@ -58,6 +60,28 @@ El volumen es un **porcentaje de la escala**: 50 % en una escala de 80 muestra
 - **Reproducir, Pausa, Detener, Anterior, Siguiente**: para el reproductor de
   red, USB o Bluetooth del receptor
 - **Reproduciendo ahora**: artista y título
+
+### Reproductor de música (Gladys 5.3+)
+
+La zona principal también es un **reproductor de música** en Gladys: la caja de
+música del panel muestra lo que reproduce el reproductor de red, USB o
+Bluetooth del receptor, tal como el receptor lo indica.
+
+- **Reproducción**: reproduciendo, en pausa o detenido. También es un control:
+  reproducir, pausa y detener se envían al receptor, y el estado mostrado es el
+  que este confirma.
+- **Título**, **Artista**, **Álbum**
+- **Duración** y **Posición** (un flujo de radio no tiene duración)
+- **Carátula**: la imagen que el receptor envía con cada pista (una imagen JPEG
+  o PNG, o un enlace a su propio servidor web). Los modelos antiguos envían una
+  imagen BMP, que Gladys no puede mostrar: en ese caso no hay carátula.
+
+El receptor no ofrece por la red ni catálogo, ni búsqueda, ni cola: elija su
+música en la aplicación Onkyo o en el receptor, Gladys sigue lo que reproduce.
+
+¿Creó su receptor con una versión anterior de la integración? Abra la pestaña
+**Descubrir** y haga clic en **Actualizar** en él para añadir estas
+funciones.
 
 ### Zona 2 y zona 3
 
@@ -111,8 +135,8 @@ principal del primer receptor):
 zona (la actual viene preseleccionada) y, si lo desea, un volumen en %, limitado
 por el ajuste **Volumen máximo**. Gladys enciende la zona, espera a que esté
 lista y luego selecciona la entrada y ajusta el volumen, exactamente como la
-acción de escena. Este formulario requiere Gladys 5.2 o posterior, que la
-integración exige ahora.
+acción de escena. Este formulario requiere Gladys 5.2 o posterior (la
+integración exige 5.3).
 
 ## Botones de la configuración
 
@@ -124,13 +148,14 @@ integración exige ahora.
 
 ## Solución de problemas
 
-| Problema                                      | Pista                                                                                                              |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| El receptor no aparece en «Descubrir»         | ¿Espera de red activada? ¿Misma red que Gladys? Si no, escriba su IP en «Direcciones de los receptores».           |
-| «Inaccesible» en cuanto pasa a modo de espera | Active la espera de red (ver arriba).                                                                              |
-| El volumen no coincide con la pantalla        | Ajuste la «Escala de volumen del receptor» (80 o 200 la mayoría de las veces).                                     |
-| Falta una entrada en la lista                 | Los modelos antiguos no anuncian sus entradas: se usa la lista estándar. Use «Enviar un comando ISCP» con `SLIxx`. |
-| Reproducir/Pausa no hacen nada                | Estas teclas controlan el propio reproductor de red/USB/Bluetooth del receptor, no una fuente HDMI.                |
+| Problema                                      | Pista                                                                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| El receptor no aparece en «Descubrir»         | ¿Espera de red activada? ¿Misma red que Gladys? Si no, escriba su IP en «Direcciones de los receptores».                                         |
+| «Inaccesible» en cuanto pasa a modo de espera | Active la espera de red (ver arriba).                                                                                                            |
+| El volumen no coincide con la pantalla        | Ajuste la «Escala de volumen del receptor» (80 o 200 la mayoría de las veces).                                                                   |
+| Falta una entrada en la lista                 | Los modelos antiguos no anuncian sus entradas: se usa la lista estándar. Use «Enviar un comando ISCP» con `SLIxx`.                               |
+| Reproducir/Pausa no hacen nada                | Estas teclas controlan el propio reproductor de red/USB/Bluetooth del receptor, no una fuente HDMI.                                              |
+| No hay carátula en la caja de música          | Los modelos antiguos envían sus carátulas como imágenes BMP, que Gladys no puede mostrar. La carátula solo existe para las fuentes de red y USB. |
 
 Para informar de un error, active **Registros detallados**, reproduzca el
 problema y adjunte los registros **sin** direcciones IP ni MAC:

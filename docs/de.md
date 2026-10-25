@@ -7,6 +7,8 @@ Protokoll (eISCP) sprechen.
 Alles bleibt **lokal**: Gladys spricht direkt in deinem Netzwerk mit dem
 Receiver (Port 60128). Kein Konto, keine Cloud, kein Internet.
 
+Sie erfordert **Gladys 5.3.0** oder neuer.
+
 ## Bevor du beginnst
 
 1. Der Receiver muss **im Netzwerk** sein (Kabel oder WLAN).
@@ -61,6 +63,29 @@ zeigt am Receiver 40 an.
   Bluetooth-Player des Receivers
 - **Aktuelle Wiedergabe**: Interpret und Titel
 
+### Musik-Player (Gladys 5.3+)
+
+Die Hauptzone ist in Gladys auch ein **Musik-Player**: Die Musik-Box des
+Dashboards zeigt, was der Netzwerk-, USB- oder Bluetooth-Player des Receivers
+spielt, so wie der Receiver es meldet.
+
+- **Wiedergabe**: läuft, pausiert oder gestoppt. Sie ist auch eine Steuerung:
+  Play, Pause und Stop werden an den Receiver geschickt, und angezeigt wird der
+  Zustand, den er bestätigt.
+- **Titel**, **Interpret**, **Album**
+- **Dauer** und **Position** (ein Radiostream hat keine Dauer)
+- **Cover**: das Bild, das der Receiver mit jedem Titel schickt (ein JPEG- oder
+  PNG-Bild oder ein Link auf seinen eigenen Webserver). Ältere Modelle schicken
+  ein BMP-Bild, das Gladys nicht anzeigen kann: dann gibt es kein Cover.
+
+Der Receiver bietet über das Netzwerk weder Katalog noch Suche noch
+Warteschlange: Wähle deine Musik in der Onkyo-App oder am Receiver, Gladys
+folgt dem, was er spielt.
+
+Hast du deinen Receiver mit einer älteren Version der Integration angelegt?
+Öffne den Tab **Entdecken** und klicke bei ihm auf **Aktualisieren**, um diese
+Funktionen hinzuzufügen.
+
 ### Zone 2 und Zone 3
 
 Ein/Aus, Lautstärke, Stumm, lauter/leiser, Eingang. Der Eingang „Quelle der
@@ -110,8 +135,8 @@ sonst die Hauptzone des ersten Receivers):
 Zone (der aktuelle ist vorausgefüllt) und, wenn du möchtest, eine Lautstärke in
 %, begrenzt durch die Einstellung **Maximale Lautstärke**. Gladys schaltet die
 Zone ein, wartet auf sie, wählt dann den Eingang und stellt die Lautstärke ein,
-genau wie die Szenen-Aktion. Dieses Formular erfordert Gladys 5.2 oder neuer,
-was die Integration inzwischen voraussetzt.
+genau wie die Szenen-Aktion. Dieses Formular erfordert Gladys 5.2 oder neuer
+(die Integration setzt 5.3 voraus).
 
 ## Schaltflächen der Konfiguration
 
@@ -124,13 +149,14 @@ was die Integration inzwischen voraussetzt.
 
 ## Fehlerbehebung
 
-| Problem                                        | Hinweis                                                                                                                   |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Der Receiver erscheint nicht unter „Entdecken“ | Netzwerk-Standby aktiviert? Im selben Netzwerk wie Gladys? Sonst gib seine IP unter „Adressen der Receiver“ ein.          |
-| „Nicht erreichbar“, sobald er im Standby ist   | Aktiviere Netzwerk-Standby (siehe oben).                                                                                  |
-| Die Lautstärke passt nicht zur Anzeige         | Stelle die „Lautstärkeskala des Receivers“ ein (meist 80 oder 200).                                                       |
-| Ein Eingang fehlt in der Liste                 | Ältere Modelle melden ihre Eingänge nicht: Dann wird die Standardliste verwendet. Nutze „ISCP-Befehl senden“ mit `SLIxx`. |
-| Play/Pause bewirken nichts                     | Diese Tasten steuern den eigenen Netzwerk-/USB-/Bluetooth-Player des Receivers, keine HDMI-Quelle.                        |
+| Problem                                        | Hinweis                                                                                                                                 |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Der Receiver erscheint nicht unter „Entdecken“ | Netzwerk-Standby aktiviert? Im selben Netzwerk wie Gladys? Sonst gib seine IP unter „Adressen der Receiver“ ein.                        |
+| „Nicht erreichbar“, sobald er im Standby ist   | Aktiviere Netzwerk-Standby (siehe oben).                                                                                                |
+| Die Lautstärke passt nicht zur Anzeige         | Stelle die „Lautstärkeskala des Receivers“ ein (meist 80 oder 200).                                                                     |
+| Ein Eingang fehlt in der Liste                 | Ältere Modelle melden ihre Eingänge nicht: Dann wird die Standardliste verwendet. Nutze „ISCP-Befehl senden“ mit `SLIxx`.               |
+| Play/Pause bewirken nichts                     | Diese Tasten steuern den eigenen Netzwerk-/USB-/Bluetooth-Player des Receivers, keine HDMI-Quelle.                                      |
+| Kein Cover in der Musik-Box                    | Ältere Modelle schicken ihre Cover als BMP-Bilder, die Gladys nicht anzeigen kann. Ein Cover gibt es nur für Netzwerk- und USB-Quellen. |
 
 Für einen Fehlerbericht aktiviere **Detaillierte Protokolle**, reproduziere
 das Problem und hänge die Protokolle **ohne** IP- oder MAC-Adressen an:

@@ -16,24 +16,25 @@ User documentation: [English](./docs/en.md) · [Français](./docs/fr.md) ·
 
 One Gladys device per **zone** of each receiver:
 
-| Zone           | Gladys features                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Main           | Power, volume (%), mute, volume up/down, input, listening mode, tuner preset, play/pause/stop/next/previous, now playing |
-| Zone 2, zone 3 | Power, volume (%), mute, volume up/down, input                                                                           |
+| Zone           | Gladys features                                                                                                                                                                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Main           | Power, volume (%), mute, volume up/down, input, listening mode, tuner preset, play/pause/stop/next/previous, now playing, music player (playback, title, artist, album, cover, duration, position) |
+| Zone 2, zone 3 | Power, volume (%), mute, volume up/down, input                                                                                                                                                     |
 
 The input list is the one the receiver declares (NRI), with the names the user
 gave the inputs; older models get the standard list. A **maximum volume** setting
 caps every slider, button and scene.
 
 Since Gladys 5.1 it also extends the scene editor and the dashboard
-(`src/capabilities/`); **Gladys 5.2.0 or later is required** for the widget's
-"Play a source" button form:
+(`src/capabilities/`); **Gladys 5.3.0 or later is required** (the widget's
+"Play a source" button form needs 5.2, the music player 5.3):
 
-| Capability     | Keys                                                                                                                          |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Scene triggers | `source_changed`, `track_changed`, `connection_changed`                                                                       |
-| Scene actions  | `play_source`, `set_mute`, `set_listening_mode`, `send_command`                                                               |
-| Widget         | `receiver` (volume, input, power, now playing, mute, listening mode, link + up to 4 buttons, "Play a source" form in standby) |
+| Capability     | Keys                                                                                                                                                                                                             |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scene triggers | `source_changed`, `track_changed`, `connection_changed`                                                                                                                                                          |
+| Scene actions  | `play_source`, `set_mute`, `set_listening_mode`, `send_command`                                                                                                                                                  |
+| Widget         | `receiver` (volume, input, power, now playing, mute, listening mode, link + up to 4 buttons, "Play a source" form in standby)                                                                                    |
+| Music player   | main zone `music` features through `publishNowPlaying` (NST / NTI / NAT / NAL / NTM / NJA), playback driven with NTC, covers served by `onMusicGetArtwork`; manifest `"music": {}` (no browse, search nor queue) |
 
 ## How it talks to the hardware
 

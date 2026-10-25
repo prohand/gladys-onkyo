@@ -11,3 +11,7 @@ export const NRI_SAMPLE =
   '<selector id="2B" value="1" name="NET" zone="07" iconid="2B"/>' +
   '<selector id="22" value="0" name="PHONO" zone="01" iconid="22"/></selectorlist>' +
   '</device></response>';
+
+// The first bytes of a JPEG (SOI + APP0 JFIF) and its end: enough for the
+// magic-number checks, which are what Gladys looks at too.
+export const JPEG_SAMPLE = Buffer.from('FFD8FFE000104A46494600010100000100010000FFD9', 'hex');

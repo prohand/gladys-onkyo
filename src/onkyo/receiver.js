@@ -8,9 +8,19 @@
 // -----------------------------------------------------------------------------
 
 import { EventEmitter } from 'node:events';
-import { createLogger } from '@gladysassistant/integration-sdk';
+import { createLogger, MUSIC_PLAYBACK_STATE } from '@gladysassistant/integration-sdk';
 import { EiscpConnection } from './connection.js';
-import { MAIN_ONLY, NET_KEYS, ZONES, parseHex, parseOnOff } from './codes.js';
+import {
+  MAIN_ONLY,
+  NET_KEYS,
+  PLAYBACK_KEYS,
+  ZONES,
+  parseHex,
+  parseNetStatus,
+  parseNetTime,
+  parseOnOff,
+} from './codes.js';
+import { JacketArt } from './jacketArt.js';
 import { parseNri } from './nri.js';
 
 const logger = createLogger({ name: 'receiver' });
@@ -48,7 +58,18 @@ export class Receiver extends EventEmitter {
         { power: null, volume: null, mute: null, source: null },
       ]),
     );
-    this.main = { listeningMode: null, preset: null, title: '', artist: '', album: '' };
+    this.main = {
+      listeningMode: null,
+      preset: null,
+      title: '',
+      artist: '',
+      album: '',
+      // Network player: MUSIC_PLAYBACK_STATE, and seconds (NTM).
+      playback: null,
+      position: null,
+      duration: null,
+    };
+    this.jacketArt = new JacketArt();
     this.lastTrack = null;
     this.trackTimer = null;
     this.connection = connection ?? new EiscpConnection({ host, port, ...rest });
@@ -109,6 +130,10 @@ export class Receiver extends EventEmitter {
     }
     commands.push(`${MAIN_ONLY.listeningMode}QSTN`, `${MAIN_ONLY.title}QSTN`);
     commands.push(`${MAIN_ONLY.artist}QSTN`, `${MAIN_ONLY.album}QSTN`);
+    commands.push(`${MAIN_ONLY.netStatus}QSTN`, `${MAIN_ONLY.netTime}QSTN`);
+    // The cover is only sent on a track change: ask for the current one (a
+    // model without this request just ignores it).
+    commands.push(`${MAIN_ONLY.jacketArt}REQ`);
     for (const command of commands) {
       await this.connection.send(command);
     }
@@ -134,6 +159,10 @@ export class Receiver extends EventEmitter {
     const route = ROUTES.get(command);
     if (route) {
       this.update(route.zone, route.key, parseZoneValue(route.key, value));
+      if (route.zone === 'main' && route.key === 'power' && value === '00') {
+        // A receiver in standby plays nothing, whatever its player said last.
+        this.update('main', 'playback', MUSIC_PLAYBACK_STATE.IDLE);
+      }
       return;
     }
     switch (command) {
@@ -148,6 +177,19 @@ export class Receiver extends EventEmitter {
       case MAIN_ONLY.album:
         this.updateTrack(command, value);
         break;
+      case MAIN_ONLY.netStatus:
+        this.update('main', 'playback', parseNetStatus(value));
+        break;
+      case MAIN_ONLY.netTime:
+        this.updateTime(value);
+        break;
+      case MAIN_ONLY.jacketArt: {
+        const artwork = this.jacketArt.push(value);
+        if (artwork !== undefined) {
+          this.emit('artwork', artwork);
+        }
+        break;
+      }
       case 'NRI': {
         const description = parseNri(value);
         if (description) {
@@ -188,6 +230,20 @@ export class Receiver extends EventEmitter {
     clearTimeout(this.trackTimer);
     this.trackTimer = setTimeout(() => this.settleTrack(), TRACK_SETTLE_MS);
     this.trackTimer.unref?.();
+  }
+
+  /**
+   * NTM, sent every second while a track plays: a `time` event, not a
+   * `change` (it would nudge the widget every second).
+   */
+  updateTime(value) {
+    const time = parseNetTime(value);
+    if (!time || (time.position === this.main.position && time.duration === this.main.duration)) {
+      return;
+    }
+    this.main.position = time.position;
+    this.main.duration = time.duration;
+    this.emit('time', time);
   }
 
   settleTrack() {
@@ -265,6 +321,18 @@ export class Receiver extends EventEmitter {
       throw new Error(`Unknown player key "${key}"`);
     }
     return this.connection.send(`${MAIN_ONLY.netControl}${parameter}`);
+  }
+
+  /**
+   * Play, pause or stop the network player.
+   * @param {number} state MUSIC_PLAYBACK_STATE: PLAYING, PAUSED or IDLE (stop)
+   */
+  setPlayback(state) {
+    const key = PLAYBACK_KEYS[Number(state)];
+    if (!key) {
+      throw new Error(`Unsupported playback state "${state}" (0 pause, 1 play, 2 stop)`);
+    }
+    return this.netKey(key);
   }
 
   /**

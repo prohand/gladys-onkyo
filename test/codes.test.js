@@ -4,7 +4,10 @@ import {
   inputLabel,
   isValidRawCommand,
   parseHex,
+  parseNetStatus,
+  parseNetTime,
   parseOnOff,
+  PLAYBACK_KEYS,
   percentToVolume,
   volumeToPercent,
 } from '../src/onkyo/codes.js';
@@ -40,4 +43,26 @@ test('a raw command is 3 letters and a printable parameter', () => {
   assert.ok(!isValidRawCommand('PWR'));
   assert.ok(!isValidRawCommand('pwr01'));
   assert.ok(!isValidRawCommand('PWR01\r!1PWR00'));
+});
+
+test('network player: NST play status → MUSIC_PLAYBACK_STATE', () => {
+  assert.equal(parseNetStatus('P--'), 1);
+  assert.equal(parseNetStatus('p--'), 0);
+  assert.equal(parseNetStatus('S--'), 2);
+  assert.equal(parseNetStatus('E--'), 2);
+  assert.equal(parseNetStatus('F-S'), 1);
+  // Newer models send more characters: only the first one is the status.
+  assert.equal(parseNetStatus('PR-xxxxx'), 1);
+  assert.equal(parseNetStatus('N/A'), null);
+  assert.equal(parseNetStatus(''), null);
+  assert.deepEqual(PLAYBACK_KEYS, { 0: 'pause', 1: 'play', 2: 'stop' });
+});
+
+test('network player: NTM elapsed / total time in seconds', () => {
+  assert.deepEqual(parseNetTime('01:23/04:56'), { position: 83, duration: 296 });
+  assert.deepEqual(parseNetTime('01:02:03/02:00:00'), { position: 3723, duration: 7200 });
+  // A radio stream: the position runs, the duration is unknown (0 = live).
+  assert.deepEqual(parseNetTime('12:34/--:--'), { position: 754, duration: 0 });
+  assert.deepEqual(parseNetTime('--:--/--:--'), { position: null, duration: 0 });
+  assert.equal(parseNetTime('N/A'), null);
 });

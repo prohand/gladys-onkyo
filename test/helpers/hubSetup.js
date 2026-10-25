@@ -17,8 +17,9 @@ export const HOST = '192.168.1.40';
  * @param {string[]} [options.created] zones whose device the user created
  * @param {object} [options.config] raw configuration
  * @param {object} [options.receiver] options of the fake receiver
+ * @param {Function} [options.fetchArtwork] reads a cover link, instead of the network
  */
-export function setupHub({ created = ['main'], config = {}, receiver = {} } = {}) {
+export function setupHub({ created = ['main'], config = {}, receiver = {}, fetchArtwork } = {}) {
   const fake = createFakeReceiver(receiver);
   const gladys = createFakeGladys();
   let clock = 1_000_000;
@@ -36,6 +37,7 @@ export function setupHub({ created = ['main'], config = {}, receiver = {} } = {}
     scan: async () => [{ id: RECEIVER_ID, host: HOST, port: 60128, model: 'TX-NR686' }],
     now: () => clock,
     reportDelayMs: 1,
+    fetchArtwork,
   });
   hub.setConfig(normalizeConfig(config));
   const stub = { id: RECEIVER_ID, host: HOST, port: 60128, model: 'TX-NR686', description: null };

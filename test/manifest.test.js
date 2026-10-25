@@ -150,15 +150,68 @@ test('dynamic selects declare a source and no static options', () => {
   }
 });
 
-test('local only, discovery on the eISCP port, Gladys 5.2 floor', () => {
+test('local only, discovery on the eISCP port, Gladys 5.3 floor', () => {
   assert.deepEqual(manifest.transports, ['local']);
   assert.deepEqual(manifest.network_discovery, [
     { type: 'udp-active-broadcast', ports: [EISCP_PORT] },
   ]);
   // 5.1.0 brought the widgets and scene cards, 5.2.0 the widget button forms
   // (an older core drops `fields` and relays the tap without `values`).
+  // 5.3.0 the music players, the keywords and the countries: an older core
+  // rejects a manifest field it does not know, the floor keeps it from trying.
   assert.ok(FORM_ACTIONS.length > 0, 'the widget declares button forms');
-  assert.equal(manifest.gladys_version, '>=5.2.0');
+  assert.ok(manifest.music && manifest.keywords, 'the manifest uses 5.3 fields');
+  assert.equal(manifest.gladys_version, '>=5.3.0');
+});
+
+// The store vocabulary of catalog shelves (2026-10): an unknown key is
+// silently dropped by the indexer, so a typo costs the shelf.
+const CATEGORY_VOCABULARY = [
+  'climate',
+  'lighting',
+  'energy',
+  'security',
+  'multimedia',
+  'appliances',
+  'environment',
+  'protocols',
+  'network',
+  'notifications',
+  'assistants',
+  'services',
+  'transport',
+  'vehicles',
+  'servers',
+  'leisure',
+];
+
+test('categories, keywords and countries follow the store rules', () => {
+  assert.ok(manifest.categories.length >= 1 && manifest.categories.length <= 3);
+  for (const category of manifest.categories) {
+    assert.ok(CATEGORY_VOCABULARY.includes(category), category);
+  }
+  assert.ok(manifest.keywords.length >= 1 && manifest.keywords.length <= 10);
+  const normalized = manifest.keywords.map((keyword) => keyword.trim().toLowerCase());
+  assert.equal(new Set(normalized).size, normalized.length, 'keywords are unique');
+  for (const keyword of normalized) {
+    assert.ok(keyword.length >= 2 && keyword.length <= 30, keyword);
+  }
+  // Onkyo, Integra and Pioneer receivers are sold everywhere: no country.
+  assert.equal(manifest.countries, undefined);
+});
+
+test('the music field declares only what the integration implements', () => {
+  // Now playing and covers only: no catalog, no search, no queue (eISCP has
+  // no way to read them as data), so no flag at all.
+  assert.deepEqual(manifest.music, {});
+  assert.equal(manifest.type, 'device');
+  assert.match(indexSource, /onMusicGetArtwork\(/);
+  // A receiver created before the music player gets its features through
+  // "Update" in the Discover tab: their values are published again then.
+  assert.match(indexSource, /onDeviceUpdated\(/);
+  for (const handler of ['onMusicBrowse', 'onMusicSearch', 'onMusicQueueGet', 'onMusicPlay']) {
+    assert.doesNotMatch(indexSource, new RegExp(handler), handler);
+  }
 });
 
 test('the widget gives a button form the time of a wake-up, like play_source', () => {

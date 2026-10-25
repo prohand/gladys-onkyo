@@ -6,6 +6,16 @@ All notable changes to this integration are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Music player (Gladys 5.3): the main zone of a receiver gets the `music` features of the dashboard music box — playback (play, pause, stop, confirmed by the receiver), title, artist, album, duration, position and cover (the jacket art the receiver sends) — published from what the receiver reports. Receivers created with an older version get them through **Update** in the Discover tab. No catalog, search or queue: the receiver offers none over the network.
+- Store search keywords (eISCP, amplifier, home cinema, TX-NR…).
+
+### Changed
+
+- Gladys 5.3.0 or later is now required.
+- Integration SDK 0.16.
+
 ## [1.2.1] - 2026-10-23
 
 - Maintenance release, no functional change.
