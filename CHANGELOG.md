@@ -6,6 +6,8 @@ All notable changes to this integration are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-25
+
 ### Added
 
 - Music player (Gladys 5.3): the main zone of a receiver gets the `music` features of the dashboard music box — playback (play, pause, stop, confirmed by the receiver), title, artist, album, duration, position and cover (the jacket art the receiver sends) — published from what the receiver reports. Receivers created with an older version get them through **Update** in the Discover tab. No catalog, search or queue: the receiver offers none over the network.
@@ -58,7 +60,8 @@ All notable changes to this integration are documented here. The format follows
 - Transport badge per device (`local` / `unreachable`) and a connection status that names the unreachable receivers.
 - `SECURITY.md`, `CHANGELOG.md`, `CLAUDE.md`, CI (format, lint, tests on Node 22 and 24, store checks and Docker build on pull requests), Dependabot, UI-driven releases with GitHub Releases.
 
-[Unreleased]: https://github.com/prohand/gladys-onkyo/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/prohand/gladys-onkyo/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/prohand/gladys-onkyo/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/prohand/gladys-onkyo/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/prohand/gladys-onkyo/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/prohand/gladys-onkyo/compare/v1.0.1...v1.1.0
